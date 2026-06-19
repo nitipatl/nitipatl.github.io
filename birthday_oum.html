@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>🎂</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -22,7 +22,7 @@ html,body{min-height:100vh;font-family:'Helvetica Neue',Arial,sans-serif;}
 @keyframes wshk{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 #wdl-kb{display:flex;flex-direction:column;gap:6px;width:100%;max-width:380px;}
 .kbrow{display:flex;gap:5px;justify-content:center;}
-.wkey{height:52px;min-width:30px;flex:1;max-width:42px;border-radius:6px;border:none;background:#818384;color:#fff;font-size:12px;font-weight:700;cursor:pointer;}
+.wkey{height:52px;min-width:30px;flex:1;max-width:42px;border-radius:6px;border:none;background:#818384;color:#fff;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
 .wkey.wwide{max-width:62px;font-size:10px;}
 .wkey.wcorrect{background:#538d4e;}
 .wkey.wpresent{background:#b59f3b;}
@@ -416,7 +416,7 @@ html,
 .dot:nth-child(3){animation-delay:.3s;}
 @keyframes bonce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
 .choices{padding:8px 12px 14px;display:flex;flex-wrap:wrap;gap:8px;flex-shrink:0;}
-.cbtn{background:#fff;border:1.5px solid #06C755;border-radius:20px;padding:8px 15px;font-size:13px;color:#06C755;cursor:pointer;font-weight:600;transition:all .15s;}
+.cbtn{background:#fff;border:1.5px solid #06C755;border-radius:20px;padding:8px 15px;font-size:13px;color:#06C755;cursor:pointer;font-weight:600;transition:all .15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
 .cbtn:hover{background:#06C755;color:#fff;}
 .cbtn.other{border-style:dashed;color:#999;border-color:#bbb;}
 .cbtn.other:hover{background:#888;color:#fff;border-color:#888;}
