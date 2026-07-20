@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Running Races · Nitipat</title>
+<meta name="description" content="Nitipat's running race calendar — pulled live from Google Calendar." />
+<style>
+  :root {
+    --coral: #de4c4f;
+    --coral-2: #e06e73;
+    --bg: #fcfcfc;
+    --panel: #ffffff;
+    --text: #333;
+    --muted: #8a8a8a;
+    --border: #ececec;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 6px 20px rgba(0,0,0,.04);
+    /* heatmap intensity (coral scale) */
+    --hm0: #eef0f1;
+    --hm1: #f7c9ca;
+    --hm2: #ef9a9c;
+    --hm3: #e5686b;
+    --hm4: #de4c4f;
+    --font: "AvenirNext-Regular", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans Thai", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15171a; --panel: #1e2126; --text: #e7e9ea; --muted: #9aa0a6;
+      --border: #2c3037; --shadow: 0 1px 3px rgba(0,0,0,.4);
+      --hm0: #24272c; --hm1: #5c2f34; --hm2: #92403f; --hm3: #c0494a; --hm4: #f0655f;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #15171a; --panel: #1e2126; --text: #e7e9ea; --muted: #9aa0a6;
+    --border: #2c3037; --shadow: 0 1px 3px rgba(0,0,0,.4);
+    --hm0: #24272c; --hm1: #5c2f34; --hm2: #92403f; --hm3: #c0494a; --hm4: #f0655f;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--font); line-height: 1.5;
+    text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--coral); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 28px 20px 64px; }
+
+  /* Header */
+  header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+  header.top h1 { font-size: 1.7rem; margin: 0; letter-spacing: -.01em; }
+  header.top .sub { color: var(--muted); font-size: .9rem; margin-top: 2px; }
+  .head-right { display: flex; align-items: center; gap: 8px; }
+  .badge { font-size: .72rem; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
+  .badge.live { color: #1a7f4b; border-color: #bfe6cf; background: rgba(26,127,75,.08); }
+  .badge.snap { color: var(--coral); border-color: rgba(222,76,79,.35); background: rgba(222,76,79,.07); }
+  .icon-btn { background: var(--panel); border: 1px solid var(--border); color: var(--text); border-radius: 10px; width: 38px; height: 38px; font-size: 1.05rem; cursor: pointer; }
+  .icon-btn:hover { border-color: var(--coral-2); }
+
+  /* Cards / panels */
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); }
+
+  /* Countdown hero */
+  .hero { padding: 22px 24px; margin: 18px 0; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; background:
+    linear-gradient(135deg, rgba(222,76,79,.10), rgba(224,110,115,.04)); }
+  .hero .days { font-size: 3.4rem; font-weight: 800; line-height: 1; color: var(--coral); min-width: 92px; }
+  .hero .days small { display: block; font-size: .8rem; font-weight: 600; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; margin-top: 6px; }
+  .hero .info { flex: 1; min-width: 220px; }
+  .hero .info .label { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .hero .info .name { font-size: 1.35rem; font-weight: 700; margin: 2px 0 6px; }
+  .hero .info .meta { color: var(--muted); font-size: .92rem; }
+  .hero .info .meta b { color: var(--text); font-weight: 600; }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 18px 0; }
+  .stat { padding: 16px; text-align: center; }
+  .stat .num { font-size: 1.8rem; font-weight: 800; color: var(--coral); }
+  .stat .lbl { font-size: .78rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .04em; }
+
+  /* Section titles */
+  h2.sec { font-size: 1.15rem; margin: 30px 0 12px; display: flex; align-items: center; gap: 8px; }
+  h2.sec .count { font-size: .8rem; color: var(--muted); font-weight: 500; }
+
+  /* Heatmap */
+  .hm-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .hm-panel { padding: 18px; overflow-x: auto; }
+  .hm-scroll { min-width: max-content; }
+  select, input[type="search"] {
+    font-family: inherit; font-size: .9rem; color: var(--text); background: var(--panel);
+    border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; outline: none;
+  }
+  select:focus, input:focus { border-color: var(--coral-2); }
+  .hm-grid { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 13px); gap: 3px; }
+  .hm-cell { width: 13px; height: 13px; border-radius: 3px; background: var(--hm0); }
+  .hm-cell.race { cursor: pointer; }
+  .hm-cell.l1 { background: var(--hm1); } .hm-cell.l2 { background: var(--hm2); }
+  .hm-cell.l3 { background: var(--hm3); } .hm-cell.l4 { background: var(--hm4); }
+  .hm-cell.race:hover { outline: 2px solid var(--coral); outline-offset: 1px; }
+  .hm-months { display: grid; grid-auto-flow: column; font-size: .68rem; color: var(--muted); margin-bottom: 4px; }
+  .hm-legend { display: flex; align-items: center; gap: 6px; font-size: .74rem; color: var(--muted); margin-top: 10px; }
+  .hm-legend .hm-cell { cursor: default; }
+  .hm-wrap { display: flex; gap: 6px; }
+  .hm-days { display: grid; grid-template-rows: repeat(7, 13px); gap: 3px; font-size: .62rem; color: var(--muted); padding-top: 0; }
+  .hm-days span { height: 13px; line-height: 13px; }
+
+  /* Controls */
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 8px 0 4px; }
+  .controls input[type="search"] { flex: 1; min-width: 180px; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .seg button { border: 0; background: var(--panel); color: var(--muted); padding: 8px 14px; font-family: inherit; font-size: .88rem; cursor: pointer; }
+  .seg button.active { background: var(--coral); color: #fff; }
+
+  /* Race grid */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .race-card { padding: 16px; position: relative; transition: box-shadow .15s, transform .15s; }
+  .race-card:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(0,0,0,.10); }
+  .race-card.declined { opacity: .55; }
+  .race-card .rdate { font-size: .8rem; color: var(--muted); }
+  .race-card .rname { font-weight: 700; font-size: 1.02rem; margin: 4px 0 8px; }
+  .race-card .rloc { font-size: .85rem; color: var(--muted); }
+  .race-card .rloc:before { content: "📍 "; }
+  .dist { display: inline-block; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; color: #fff; background: var(--coral); margin-bottom: 8px; }
+  .dist.c0 { background: #b8bfc2; } .dist.c1 { background: #67a9cf; }
+  .dist.c2 { background: #e0863b; } .dist.c3 { background: var(--coral); } .dist.c4 { background: #8e3538; }
+  .tag { position: absolute; top: 12px; right: 12px; font-size: .66rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); border: 1px solid var(--border); padding: 2px 7px; border-radius: 999px; }
+  .race-card.flash { animation: flash 1.4s ease; }
+  @keyframes flash { 0%,100% { box-shadow: var(--shadow); } 20% { box-shadow: 0 0 0 3px var(--coral); } }
+  .rdesc { font-size: .82rem; color: var(--muted); margin-top: 8px; white-space: pre-line; max-height: 0; overflow: hidden; transition: max-height .2s; }
+  .race-card.open .rdesc { max-height: 260px; overflow: auto; }
+  .more { font-size: .78rem; color: var(--coral); cursor: pointer; margin-top: 8px; display: inline-block; }
+
+  .empty { color: var(--muted); font-size: .9rem; padding: 20px 0; }
+  footer { margin-top: 44px; color: var(--muted); font-size: .82rem; border-top: 1px solid var(--border); padding-top: 16px; }
+  .note { font-size: .82rem; color: var(--muted); background: rgba(222,76,79,.06); border: 1px solid rgba(222,76,79,.2); border-radius: 10px; padding: 10px 12px; margin: 8px 0; display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>🏃 Running Races</h1>
+      <div class="sub">Race schedule, pulled from my Google Calendar</div>
+    </div>
+    <div class="head-right">
+      <span id="source" class="badge">loading…</span>
+      <button id="theme" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+    </div>
+  </header>
+
+  <div id="snapNote" class="note"></div>
+
+  <!-- Countdown hero -->
+  <section id="hero" class="panel hero" style="display:none">
+    <div class="days" id="heroDays">–<small>days to go</small></div>
+    <div class="info">
+      <div class="label">Next race</div>
+      <div class="name" id="heroName">—</div>
+      <div class="meta" id="heroMeta"></div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="stats" id="stats"></section>
+
+  <!-- Heatmap -->
+  <h2 class="sec">📅 Race calendar heatmap</h2>
+  <section class="panel hm-panel">
+    <div class="hm-head">
+      <div style="font-size:.85rem;color:var(--muted)">Each square is a day · colour = distance</div>
+      <select id="hmYear" aria-label="Heatmap year"></select>
+    </div>
+    <div class="hm-scroll">
+      <div class="hm-months" id="hmMonths"></div>
+      <div class="hm-wrap">
+        <div class="hm-days"><span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span></div>
+        <div class="hm-grid" id="hmGrid"></div>
+      </div>
+    </div>
+    <div class="hm-legend">
+      Less
+      <span class="hm-cell"></span><span class="hm-cell l1"></span><span class="hm-cell l2"></span>
+      <span class="hm-cell l3"></span><span class="hm-cell l4"></span>
+      More · <span style="margin-left:4px">shorter → longer distance</span>
+    </div>
+  </section>
+
+  <!-- Controls -->
+  <h2 class="sec">🔎 Browse races <span class="count" id="browseCount"></span></h2>
+  <div class="controls">
+    <input type="search" id="q" placeholder="Search race or place…" />
+    <select id="fCat"><option value="">All distances</option></select>
+    <select id="fYear"><option value="">All years</option></select>
+    <div class="seg" id="fWhen">
+      <button data-when="upcoming" class="active">Upcoming</button>
+      <button data-when="past">Past</button>
+      <button data-when="all">All</button>
+    </div>
+  </div>
+
+  <div id="lists"></div>
+
+  <footer>
+    <div>Data source: my <b>running</b> Google Calendar. The page tries a live read of the public
+      <code>.ics</code> feed; if that isn't reachable it shows a saved snapshot.</div>
+    <div style="margin-top:6px"><a href="index.html">← back to home</a></div>
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------ *
+ * 1. Data: public ICS feed + baked-in snapshot fallback
+ * ------------------------------------------------------------------ */
+var CAL_ID = "d596912e7acbba43d63939c2748ebdc60aff0222c060e8b31306b05ba44af85f@group.calendar.google.com";
+var ICS_URL = "https://calendar.google.com/calendar/ical/" +
+  encodeURIComponent(CAL_ID) + "/public/basic.ics";
+// Google's ICS endpoint sends no CORS headers, so fetch it through a CORS relay.
+var PROXIES = [
+  function (u) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
+  function (u) { return "https://corsproxy.io/?url=" + encodeURIComponent(u); }
+];
+
+// Snapshot captured from the calendar on 2026-07-20 (fallback + heatmap seed).
+var SNAPSHOT_DATE = "2026-07-20";
+var SNAPSHOT = [
+  {name:"17th Siriraj Walk and Run - 21k", date:"2025-04-27", loc:"Siriraj Hospital, Bangkok"},
+  {name:"KUL city day half marathon - 21k", date:"2025-05-04", loc:"Kuala Lumpur, Malaysia"},
+  {name:"Huahin marathon - 42k", date:"2025-05-11", loc:"Hua Hin, Prachuap Khiri Khan"},
+  {name:"Run for relife - 11k", date:"2025-05-25", loc:"Nonthaburi"},
+  {name:"วิ่งดอกบัวคู่ - 21k", date:"2025-06-15", loc:"Suan Luang Rama IX, Bangkok"},
+  {name:"Pattaya marathon - 4.5k", date:"2025-07-19", loc:"Pattaya City, Chon Buri"},
+  {name:"Pattaya marathon - 21k", date:"2025-07-20", loc:"Pattaya City, Chon Buri"},
+  {name:"Run for mom - 21k", date:"2025-08-12", loc:""},
+  {name:"Bangkok Double Bridge Run For Red Cross 2025 - 21k", date:"2025-08-17", loc:""},
+  {name:"NONTHABURI NIGHT RUN2025 - 12k", date:"2025-08-23", loc:"Nonthaburi"},
+  {name:"25k", date:"2025-08-31", loc:""},
+  {name:"28k", date:"2025-09-07", loc:""},
+  {name:"15k", date:"2025-09-14", loc:""},
+  {name:"21k", date:"2025-09-21", loc:""},
+  {name:"PEA Mini Marathon - 10k", date:"2025-09-28", loc:""},
+  {name:"30k", date:"2025-10-05", loc:""},
+  {name:"แปลงยาว 33k", date:"2025-10-12", loc:""},
+  {name:"10k", date:"2025-10-19", loc:""},
+  {name:"Kanazawa marathon", date:"2025-10-26", loc:"Kanazawa, Japan"},
+  {name:"Walk run bike - 12k", date:"2025-11-02", loc:""},
+  {name:"Bangsan 42k", date:"2025-11-09", loc:"Bang Saen, Chon Buri"},
+  {name:"Pocari Sweat Trial Run Thailand 2025 - 30k", date:"2025-11-15", loc:"Chiang Mai"},
+  {name:"Reignwood Run 2025 - 12k", date:"2025-11-23", loc:""},
+  {name:"ATM 21k", date:"2025-11-30", loc:""},
+  {name:"Bangsaen 21", date:"2025-12-21", loc:"Bang Saen, Chon Buri"},
+  {name:"Pocari 21k", date:"2026-01-18", loc:""},
+  {name:"Cmu marathon - 42k", date:"2026-02-01", loc:"Chiang Mai"},
+  {name:"Osaka marathon", date:"2026-02-22", loc:"Osaka, Japan"},
+  {name:"RUN FOR RELIFE 2026 - 11.5k", date:"2026-03-29", loc:""},
+  {name:"Beijing half marathon", date:"2026-04-12", loc:"Beijing, China"},
+  {name:"Sketcher - 10k", date:"2026-05-31", loc:"Chulalongkorn University, Bangkok"},
+  {name:"Sattahip 10k", date:"2026-06-13", loc:"Sattahip, Chon Buri"},
+  {name:"Nonthaburi night run - 10k", date:"2026-06-20", loc:"Nonthaburi"},
+  {name:"Yothin run - 10k", date:"2026-06-28", loc:""},
+  {name:"Run for the wild - 15k", date:"2026-07-05", loc:"Wangree Resort, Nakhon Nayok"},
+  {name:"GPO Run for 60th Anniversary (21K)", date:"2026-07-12", loc:"GPO, Bangkok",
+    desc:"GPO Run for 60th Anniversary (Half Marathon 21 KM). Release time 03:30 AM."},
+  {name:"RUN MUN KAN Season 3: 10K Run", date:"2026-07-31", loc:"Thai Paper Mill, Kanchanaburi",
+    desc:"RUN MUN KAN Season 3 : Kanchanaburi Movie Night Run 2026. Distance: 10 KM (Mini Marathon)."},
+  {name:"TGS Charity Run 2026 - 10k", date:"2026-08-09", loc:"Nonthaburi Pier"},
+  {name:"12 Aug - 21k", date:"2026-08-12", loc:"Queen Sirikit National Convention Centre, Bangkok"},
+  {name:"Red Cross Pakkret City Run 2026 X Muang Thong Thani - 10km", date:"2026-08-30",
+    loc:"Muang Thong Thani, Pak Kret, Nonthaburi",
+    desc:"Mini Marathon 10 KM · BIB 0170 · M 30-39 · Start 3:30 AM · Outlet Square Muang Thong Thani."},
+  {name:"Padriew 21k", date:"2026-09-06", loc:"Chachoengsao"},
+  {name:"รัญจวน 1st RUN 10K", date:"2026-09-19", loc:"บางกะเจ้า",
+    desc:"กิจกรรมรัญจวน 1st RUN 19 กันยายน 2026 ที่บางกะเจ้า ~10 กม. ของรางวัล: เสื้อวิ่ง, Badge, ผ้าโพกหัว, โปสเตอร์ A3."},
+  {name:"Sanrio Characters Half Marathon", date:"2026-09-27", loc:"",
+    desc:"21 km (Half Marathon), Registration ID: NPJMYF55."},
+  {name:"PEA Mini Marathon 2026 - 10k", date:"2026-10-04", loc:""},
+  {name:"Tokyo Legacy Half Marathon - 21km", date:"2026-10-18", loc:"Tokyo, Japan", status:"declined"},
+  {name:"Chengdu Marathon 2026 (Half Marathon - 21K)", date:"2026-10-25", loc:"Chengdu, China"},
+  {name:"SAUCONY BKK10K", date:"2026-10-25", loc:"Bangkok", desc:"10 KM race"},
+  {name:"Walk run bike - 11k", date:"2026-11-01", loc:"Nonthaburi"},
+  {name:"Bangsaen 42k", date:"2026-11-15", loc:"Bangsaen Beach, Chon Buri"},
+  {name:"ATM 21k", date:"2026-11-28", loc:"Bangkok"},
+  {name:"ATM 4.5k", date:"2026-11-29", loc:"Bangkok"},
+  {name:"Bangsaen 21k", date:"2026-12-20", loc:"Bangsaen Beach, Chon Buri"}
+];
+
+/* ------------------------------------------------------------------ *
+ * 2. Parsing helpers
+ * ------------------------------------------------------------------ */
+function parseDistance(name) {
+  var km = null;
+  var re = /(\d+(?:\.\d+)?)\s*k(?:m)?(?![a-z])/gi, m, last = null;
+  while ((m = re.exec(name)) !== null) { last = m[1]; }
+  if (last !== null) km = parseFloat(last);
+  if (km === null) {
+    var low = name.toLowerCase();
+    if (/\bhalf\b/.test(low) && /marathon/.test(low)) km = 21.1;
+    else if (/marathon/.test(low)) km = 42.195;
+  }
+  if (km === null) { // bare number like "Bangsaen 21"
+    var b = name.match(/\b(\d{1,2}(?:\.\d+)?)\b/);
+    if (b) { var v = parseFloat(b[1]); if (v >= 3 && v <= 60) km = v; }
+  }
+  return km;
+}
+function categoryOf(km) {
+  if (km === null) return {key:"other", label:"Other", cls:"c0"};
+  if (km < 8)   return {key:"short", label:"Fun run (<8K)", cls:"c1"};
+  if (km < 13)  return {key:"10k",   label:"10K", cls:"c2"};
+  if (km < 30)  return {key:"half",  label:"Half / 21K", cls:"c3"};
+  return {key:"full", label:"Full / 42K+", cls:"c4"};
+}
+function hmLevel(km) {
+  if (km === null) return 1;
+  if (km < 8) return 1; if (km < 13) return 2; if (km < 30) return 3; return 4;
+}
+function dateFromYMD(s) { var p = s.split("-"); return new Date(+p[0], +p[1]-1, +p[2]); }
+
+function makeEvent(name, dateObj, loc, desc, status) {
+  var km = parseDistance(name);
+  return {
+    name: name, date: dateObj, loc: loc || "", desc: desc || "",
+    status: status || "", km: km, cat: categoryOf(km), year: dateObj.getFullYear()
+  };
+}
+function fromSnapshot() {
+  return SNAPSHOT.map(function (e) { return makeEvent(e.name, dateFromYMD(e.date), e.loc, e.desc, e.status); });
+}
+
+/* Minimal ICS (VEVENT) parser */
+function parseICS(text) {
+  var raw = text.replace(/\r\n/g, "\n").split("\n");
+  var lines = [];
+  for (var i = 0; i < raw.length; i++) {           // unfold folded lines
+    if ((raw[i][0] === " " || raw[i][0] === "\t") && lines.length) lines[lines.length-1] += raw[i].slice(1);
+    else lines.push(raw[i]);
+  }
+  function unesc(v) { return v.replace(/\\n/gi, " ").replace(/\\,/g, ",").replace(/\\;/g, ";").replace(/\\\\/g, "\\"); }
+  var events = [], cur = null;
+  for (var j = 0; j < lines.length; j++) {
+    var ln = lines[j];
+    if (ln === "BEGIN:VEVENT") { cur = {}; continue; }
+    if (ln === "END:VEVENT") {
+      if (cur && cur.SUMMARY && cur.DTSTART) {
+        var d = cur.DTSTART.replace(/[^0-9T]/g, "");
+        var y = +d.slice(0,4), mo = +d.slice(4,6)-1, da = +d.slice(6,8);
+        if (y) events.push(makeEvent(unesc(cur.SUMMARY), new Date(y, mo, da), cur.LOCATION ? unesc(cur.LOCATION) : "", cur.DESCRIPTION ? unesc(cur.DESCRIPTION) : "", ""));
+      }
+      cur = null; continue;
+    }
+    if (!cur) continue;
+    var c = ln.indexOf(":"); if (c < 0) continue;
+    var keyfull = ln.slice(0, c), val = ln.slice(c+1);
+    var key = keyfull.split(";")[0];
+    if (key === "SUMMARY" || key === "LOCATION" || key === "DESCRIPTION" || key === "UID") cur[key] = val;
+    else if (key === "DTSTART") cur.DTSTART = val;
+  }
+  return events;
+}
+
+/* ------------------------------------------------------------------ *
+ * 3. State + load
+ * ------------------------------------------------------------------ */
+var ALL = [];
+var filter = { q: "", cat: "", year: "", when: "upcoming" };
+var today = (function () { var t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); })();
+
+function setSource(kind) {
+  var el = document.getElementById("source");
+  if (kind === "live") { el.textContent = "● Live from Calendar"; el.className = "badge live"; }
+  else {
+    el.textContent = "● Snapshot " + SNAPSHOT_DATE; el.className = "badge snap";
+    var n = document.getElementById("snapNote");
+    n.style.display = "block";
+    n.innerHTML = "Showing a saved snapshot (" + SNAPSHOT_DATE + "). The live calendar feed couldn't be reached — this works only if the running calendar is set to <b>public</b>.";
+  }
+}
+
+function fetchWithTimeout(url, ms) {
+  var ctrl = new AbortController();
+  var t = setTimeout(function () { ctrl.abort(); }, ms);
+  return fetch(url, { signal: ctrl.signal }).then(function (r) {
+    clearTimeout(t); if (!r.ok) throw new Error("HTTP " + r.status); return r.text();
+  });
+}
+function tryLive(i) {
+  if (i >= PROXIES.length) return Promise.reject();
+  return fetchWithTimeout(PROXIES[i](ICS_URL), 9000).then(function (txt) {
+    var ev = parseICS(txt);
+    if (!ev.length) throw new Error("empty");
+    return ev;
+  }).catch(function () { return tryLive(i + 1); });
+}
+
+function boot() {
+  tryLive(0).then(function (ev) {
+    ALL = ev; setSource("live"); render();
+  }).catch(function () {
+    ALL = fromSnapshot(); setSource("snapshot"); render();
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * 4. Rendering
+ * ------------------------------------------------------------------ */
+var fmtLong = new Intl.DateTimeFormat("en-GB", { weekday:"short", day:"numeric", month:"short", year:"numeric" });
+var fmtDay  = new Intl.DateTimeFormat("en-GB", { day:"numeric", month:"short", year:"numeric" });
+
+function distLabel(e) { return e.km === null ? "—" : (e.km + " km"); }
+
+function render() {
+  ALL.sort(function (a, b) { return a.date - b.date; });
+  renderHero();
+  renderStats();
+  buildFilters();
+  buildHeatmapYears();
+  renderHeatmap();
+  renderLists();
+}
+
+function renderHero() {
+  var next = ALL.filter(function (e) { return e.date >= today && e.status !== "declined"; })[0];
+  var hero = document.getElementById("hero");
+  if (!next) { hero.style.display = "none"; return; }
+  hero.style.display = "flex";
+  var days = Math.round((next.date - today) / 86400000);
+  document.getElementById("heroDays").innerHTML =
+    (days === 0 ? "Today" : days) + "<small>" + (days === 0 ? "race day!" : "days to go") + "</small>";
+  document.getElementById("heroName").textContent = next.name;
+  document.getElementById("heroMeta").innerHTML =
+    "<b>" + fmtLong.format(next.date) + "</b>" +
+    (next.km !== null ? " · " + distLabel(next) : "") +
+    (next.loc ? " · " + escapeHtml(next.loc) : "");
+}
+
+function renderStats() {
+  var known = ALL.filter(function (e) { return e.km !== null; });
+  var totalKm = known.reduce(function (s, e) { return s + e.km; }, 0);
+  var upcoming = ALL.filter(function (e) { return e.date >= today; }).length;
+  var fulls = ALL.filter(function (e) { return e.km !== null && e.km >= 30; }).length;
+  var halfs = ALL.filter(function (e) { return e.km !== null && e.km >= 13 && e.km < 30; }).length;
+  var tiles = [
+    [ALL.length, "Races"],
+    [Math.round(totalKm).toLocaleString(), "Total km"],
+    [upcoming, "Upcoming"],
+    [halfs, "Half / 21K"],
+    [fulls, "Full / 42K+"]
+  ];
+  document.getElementById("stats").innerHTML = tiles.map(function (t) {
+    return '<div class="panel stat"><div class="num">' + t[0] + '</div><div class="lbl">' + t[1] + '</div></div>';
+  }).join("");
+}
+
+function buildFilters() {
+  var cats = [["short","Fun run (<8K)"],["10k","10K"],["half","Half / 21K"],["full","Full / 42K+"],["other","Other"]];
+  var present = {}; ALL.forEach(function (e) { present[e.cat.key] = true; });
+  var sel = document.getElementById("fCat");
+  sel.innerHTML = '<option value="">All distances</option>' +
+    cats.filter(function (c) { return present[c[0]]; })
+        .map(function (c) { return '<option value="' + c[0] + '">' + c[1] + '</option>'; }).join("");
+  var years = {}; ALL.forEach(function (e) { years[e.year] = true; });
+  var ys = Object.keys(years).sort();
+  document.getElementById("fYear").innerHTML = '<option value="">All years</option>' +
+    ys.map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join("");
+  sel.value = filter.cat; document.getElementById("fYear").value = filter.year;
+}
+
+function matches(e) {
+  if (filter.cat && e.cat.key !== filter.cat) return false;
+  if (filter.year && String(e.year) !== filter.year) return false;
+  if (filter.when === "upcoming" && e.date < today) return false;
+  if (filter.when === "past" && e.date >= today) return false;
+  if (filter.q) {
+    var q = filter.q.toLowerCase();
+    if ((e.name + " " + e.loc).toLowerCase().indexOf(q) < 0) return false;
+  }
+  return true;
+}
+
+function renderLists() {
+  var shown = ALL.filter(matches);
+  document.getElementById("browseCount").textContent = shown.length + " shown";
+  var host = document.getElementById("lists");
+  if (filter.when === "all") {
+    var up = shown.filter(function (e) { return e.date >= today; });
+    var pa = shown.filter(function (e) { return e.date < today; }).reverse();
+    host.innerHTML = section("Upcoming", up) + section("Past", pa);
+  } else if (filter.when === "past") {
+    host.innerHTML = section("Past", shown.slice().reverse());
+  } else {
+    host.innerHTML = section("Upcoming", shown);
+  }
+  wireCards();
+}
+function section(title, arr) {
+  if (!arr.length) return '<h2 class="sec">' + title + '</h2><div class="empty">No races match.</div>';
+  return '<h2 class="sec">' + title + ' <span class="count">' + arr.length + '</span></h2>' +
+    '<div class="grid">' + arr.map(cardHtml).join("") + '</div>';
+}
+function cardHtml(e) {
+  var idx = ALL.indexOf(e);
+  var declined = e.status === "declined";
+  var hasDesc = e.desc && e.desc.length > 0;
+  return '<div class="race-card panel' + (declined ? ' declined' : '') + '" id="race-' + idx + '">' +
+    (declined ? '<span class="tag">skipped</span>' : '') +
+    '<span class="dist ' + e.cat.cls + '">' + distLabel(e) + '</span>' +
+    '<div class="rdate">' + fmtLong.format(e.date) + '</div>' +
+    '<div class="rname">' + escapeHtml(e.name) + '</div>' +
+    (e.loc ? '<div class="rloc">' + escapeHtml(e.loc) + '</div>' : '') +
+    (hasDesc ? '<span class="more" data-idx="' + idx + '">details ▾</span><div class="rdesc">' + escapeHtml(e.desc) + '</div>' : '') +
+    '</div>';
+}
+function wireCards() {
+  Array.prototype.forEach.call(document.querySelectorAll(".more"), function (m) {
+    m.onclick = function () {
+      var card = document.getElementById("race-" + m.getAttribute("data-idx"));
+      card.classList.toggle("open");
+      m.textContent = card.classList.contains("open") ? "details ▴" : "details ▾";
+    };
+  });
+}
+
+/* Heatmap */
+function buildHeatmapYears() {
+  var years = {}; ALL.forEach(function (e) { years[e.year] = true; });
+  var ys = Object.keys(years).sort();
+  var sel = document.getElementById("hmYear");
+  var prev = sel.value;
+  sel.innerHTML = ys.map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join("");
+  sel.value = prev || (years[today.getFullYear()] ? String(today.getFullYear()) : ys[ys.length-1]);
+}
+function renderHeatmap() {
+  var year = +document.getElementById("hmYear").value;
+  var byDay = {};
+  ALL.forEach(function (e) {
+    if (e.year !== year) return;
+    var k = e.date.getMonth() + "-" + e.date.getDate();
+    (byDay[k] = byDay[k] || []).push(e);
+  });
+  var start = new Date(year, 0, 1);
+  var grid = document.getElementById("hmGrid");
+  var months = document.getElementById("hmMonths");
+  grid.innerHTML = ""; months.innerHTML = "";
+  // pad so column 1 starts on Sunday
+  var lead = start.getDay();
+  var monthCols = {}; var col = 0;
+  for (var p = 0; p < lead; p++) { var s = document.createElement("div"); s.className = "hm-cell"; s.style.visibility = "hidden"; grid.appendChild(s); }
+  var d = new Date(start);
+  while (d.getFullYear() === year) {
+    if (d.getDay() === 0) col++;
+    var key = d.getMonth() + "-" + d.getDate();
+    var races = byDay[key];
+    var cell = document.createElement("div");
+    cell.className = "hm-cell" + (races ? " race l" + Math.max.apply(null, races.map(function (r) { return hmLevel(r.km); })) : "");
+    if (races) {
+      var names = races.map(function (r) { return r.name + (r.km !== null ? " (" + r.km + "k)" : ""); }).join(", ");
+      cell.title = fmtDay.format(d) + " — " + names;
+      (function (r0) { cell.onclick = function () { jumpTo(r0); }; })(races[0]);
+    } else {
+      cell.title = fmtDay.format(d);
+    }
+    grid.appendChild(cell);
+    if (d.getDate() === 1) monthCols[col] = d.toLocaleDateString("en-US", { month: "short" });
+    d.setDate(d.getDate() + 1);
+  }
+  // month labels roughly aligned to columns
+  var totalCols = col + 1;
+  months.style.gridTemplateColumns = "repeat(" + totalCols + ", 16px)";
+  var lbl = "";
+  for (var cc = 1; cc <= totalCols; cc++) lbl += '<div>' + (monthCols[cc] ? monthCols[cc] : "") + '</div>';
+  months.innerHTML = lbl;
+}
+function jumpTo(e) {
+  // make sure the race is visible: switch to "all", clear filters that would hide it
+  filter.when = "all"; filter.cat = ""; filter.year = ""; filter.q = "";
+  syncControls();
+  renderLists();
+  var idx = ALL.indexOf(e);
+  var card = document.getElementById("race-" + idx);
+  if (card) {
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+    card.classList.remove("flash"); void card.offsetWidth; card.classList.add("flash");
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * 5. Controls wiring
+ * ------------------------------------------------------------------ */
+function syncControls() {
+  document.getElementById("q").value = filter.q;
+  document.getElementById("fCat").value = filter.cat;
+  document.getElementById("fYear").value = filter.year;
+  Array.prototype.forEach.call(document.querySelectorAll("#fWhen button"), function (b) {
+    b.classList.toggle("active", b.getAttribute("data-when") === filter.when);
+  });
+}
+document.getElementById("q").addEventListener("input", function (e) { filter.q = e.target.value; renderLists(); });
+document.getElementById("fCat").addEventListener("change", function (e) { filter.cat = e.target.value; renderLists(); });
+document.getElementById("fYear").addEventListener("change", function (e) { filter.year = e.target.value; renderLists(); });
+Array.prototype.forEach.call(document.querySelectorAll("#fWhen button"), function (b) {
+  b.addEventListener("click", function () { filter.when = b.getAttribute("data-when"); syncControls(); renderLists(); });
+});
+document.getElementById("hmYear").addEventListener("change", renderHeatmap);
+
+/* Theme toggle */
+(function () {
+  var btn = document.getElementById("theme");
+  function apply(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    btn.textContent = t === "dark" ? "☀️" : "🌙";
+    try { localStorage.setItem("run-theme", t); } catch (e) {}
+  }
+  var saved; try { saved = localStorage.getItem("run-theme"); } catch (e) {}
+  if (saved) apply(saved);
+  else btn.textContent = window.matchMedia("(prefers-color-scheme: dark)").matches ? "☀️" : "🌙";
+  btn.addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme");
+    if (!cur) cur = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    apply(cur === "dark" ? "light" : "dark");
+  });
+})();
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+  });
+}
+
+boot();
+</script>
+</body>
+</html>
