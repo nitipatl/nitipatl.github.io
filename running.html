@@ -3,207 +3,208 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Running Races · Nitipat</title>
-<meta name="description" content="Nitipat's running race calendar — pulled live from Google Calendar." />
+<title>Nitipat's Running Event</title>
+<meta name="description" content="Nitipat's running race calendar — pulled from Google Calendar." />
 <style>
   :root {
-    --coral: #de4c4f;
-    --coral-2: #e06e73;
-    --bg: #fcfcfc;
-    --panel: #ffffff;
-    --text: #333;
-    --muted: #8a8a8a;
-    --border: #ececec;
-    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 6px 20px rgba(0,0,0,.04);
-    /* heatmap intensity (coral scale) */
-    --hm0: #eef0f1;
-    --hm1: #f7c9ca;
-    --hm2: #ef9a9c;
-    --hm3: #e5686b;
-    --hm4: #de4c4f;
-    --font: "AvenirNext-Regular", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans Thai", sans-serif;
+    --accent: #de4c4f;
+    --accent-2: #e06e73;
+    --blue: #4a9eff;
+    --bg: #0d0f12;
+    --panel: #14171b;
+    --panel-2: #1a1e23;
+    --text: #ececed;
+    --muted: #8b9199;
+    --faint: #666d75;
+    --border: #24282e;
+    --chip: #1a1e23;
+    --chip-on: rgba(74,158,255,.16);
+    --chip-on-bd: #3b6ea5;
+    /* green race-intensity scale */
+    --g0: #1b2027; --g1: #0e4429; --g2: #006d32; --g3: #26a641; --g4: #39d353;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans Thai", sans-serif;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Noto Serif Thai", serif;
   }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #15171a; --panel: #1e2126; --text: #e7e9ea; --muted: #9aa0a6;
-      --border: #2c3037; --shadow: 0 1px 3px rgba(0,0,0,.4);
-      --hm0: #24272c; --hm1: #5c2f34; --hm2: #92403f; --hm3: #c0494a; --hm4: #f0655f;
+  :root[data-theme="light"] {
+    --bg: #fbfbfa; --panel: #ffffff; --panel-2: #f4f5f6; --text: #1c1e21;
+    --muted: #6a7079; --faint: #9aa0a6; --border: #e6e7e9; --chip: #f2f3f4;
+    --chip-on: rgba(74,158,255,.12); --chip-on-bd: #9cc4f0;
+    --g0: #ebedef; --g1: #9be9a8; --g2: #40c463; --g3: #30a14e; --g4: #216e39;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #fbfbfa; --panel: #ffffff; --panel-2: #f4f5f6; --text: #1c1e21;
+      --muted: #6a7079; --faint: #9aa0a6; --border: #e6e7e9; --chip: #f2f3f4;
+      --chip-on: rgba(74,158,255,.12); --chip-on-bd: #9cc4f0;
+      --g0: #ebedef; --g1: #9be9a8; --g2: #40c463; --g3: #30a14e; --g4: #216e39;
     }
-  }
-  :root[data-theme="dark"] {
-    --bg: #15171a; --panel: #1e2126; --text: #e7e9ea; --muted: #9aa0a6;
-    --border: #2c3037; --shadow: 0 1px 3px rgba(0,0,0,.4);
-    --hm0: #24272c; --hm1: #5c2f34; --hm2: #92403f; --hm3: #c0494a; --hm4: #f0655f;
   }
 
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
   body {
-    margin: 0; background: var(--bg); color: var(--text);
-    font-family: var(--font); line-height: 1.5;
-    text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased;
+    margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans);
+    line-height: 1.5; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
   }
-  a { color: var(--coral); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .wrap { max-width: 1000px; margin: 0 auto; padding: 28px 20px 64px; }
+  a { color: var(--accent); text-decoration: none; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 34px 22px 72px; }
 
   /* Header */
-  header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
-  header.top h1 { font-size: 1.7rem; margin: 0; letter-spacing: -.01em; }
-  header.top .sub { color: var(--muted); font-size: .9rem; margin-top: 2px; }
+  .eyebrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .eyebrow .kicker { font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .eyebrow .kicker:before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
   .head-right { display: flex; align-items: center; gap: 8px; }
-  .badge { font-size: .72rem; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
-  .badge.live { color: #1a7f4b; border-color: #bfe6cf; background: rgba(26,127,75,.08); }
-  .badge.snap { color: var(--coral); border-color: rgba(222,76,79,.35); background: rgba(222,76,79,.07); }
-  .icon-btn { background: var(--panel); border: 1px solid var(--border); color: var(--text); border-radius: 10px; width: 38px; height: 38px; font-size: 1.05rem; cursor: pointer; }
-  .icon-btn:hover { border-color: var(--coral-2); }
+  .badge { font-size: .7rem; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
+  .badge.live { color: #2ea36a; border-color: rgba(46,163,106,.4); }
+  .badge.snap { color: var(--accent-2); border-color: rgba(224,110,115,.4); }
+  .icon-btn { background: var(--panel); border: 1px solid var(--border); color: var(--text); border-radius: 9px; width: 34px; height: 34px; font-size: 1rem; cursor: pointer; }
+  .icon-btn:hover { border-color: var(--accent-2); }
 
-  /* Cards / panels */
-  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); }
+  h1.title { font-family: var(--serif); font-weight: 600; font-size: clamp(2.4rem, 8vw, 3.6rem); line-height: 1.02; letter-spacing: -.01em; margin: 18px 0 16px; }
+  .summary { color: var(--muted); font-size: .96rem; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 4px; }
+  .summary .sep { color: var(--faint); margin: 0 6px; }
+  .summary b { color: var(--text); font-weight: 600; }
+  .rule { height: 1px; background: var(--border); margin: 22px 0; border: 0; }
 
-  /* Countdown hero */
-  .hero { padding: 22px 24px; margin: 18px 0; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; background:
-    linear-gradient(135deg, rgba(222,76,79,.10), rgba(224,110,115,.04)); }
-  .hero .days { font-size: 3.4rem; font-weight: 800; line-height: 1; color: var(--coral); min-width: 92px; }
-  .hero .days small { display: block; font-size: .8rem; font-weight: 600; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; margin-top: 6px; }
-  .hero .info { flex: 1; min-width: 220px; }
-  .hero .info .label { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-  .hero .info .name { font-size: 1.35rem; font-weight: 700; margin: 2px 0 6px; }
-  .hero .info .meta { color: var(--muted); font-size: .92rem; }
-  .hero .info .meta b { color: var(--text); font-weight: 600; }
-
-  /* Stats */
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 18px 0; }
-  .stat { padding: 16px; text-align: center; }
-  .stat .num { font-size: 1.8rem; font-weight: 800; color: var(--coral); }
-  .stat .lbl { font-size: .78rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .04em; }
-
-  /* Section titles */
-  h2.sec { font-size: 1.15rem; margin: 30px 0 12px; display: flex; align-items: center; gap: 8px; }
-  h2.sec .count { font-size: .8rem; color: var(--muted); font-weight: 500; }
+  /* Countdown */
+  .countdown { display: flex; align-items: baseline; gap: 10px; font-size: .96rem; color: var(--muted); margin: 2px 0 4px; }
+  .countdown b { color: var(--text); }
+  .countdown .n { color: var(--accent); font-weight: 800; font-size: 1.15rem; }
 
   /* Heatmap */
-  .hm-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-  .hm-panel { padding: 18px; overflow-x: auto; }
-  .hm-scroll { min-width: max-content; }
-  select, input[type="search"] {
-    font-family: inherit; font-size: .9rem; color: var(--text); background: var(--panel);
-    border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; outline: none;
-  }
-  select:focus, input:focus { border-color: var(--coral-2); }
-  .hm-grid { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 13px); gap: 3px; }
-  .hm-cell { width: 13px; height: 13px; border-radius: 3px; background: var(--hm0); }
-  .hm-cell.race { cursor: pointer; }
-  .hm-cell.l1 { background: var(--hm1); } .hm-cell.l2 { background: var(--hm2); }
-  .hm-cell.l3 { background: var(--hm3); } .hm-cell.l4 { background: var(--hm4); }
-  .hm-cell.race:hover { outline: 2px solid var(--coral); outline-offset: 1px; }
-  .hm-months { display: grid; grid-auto-flow: column; font-size: .68rem; color: var(--muted); margin-bottom: 4px; }
-  .hm-legend { display: flex; align-items: center; gap: 6px; font-size: .74rem; color: var(--muted); margin-top: 10px; }
-  .hm-legend .hm-cell { cursor: default; }
-  .hm-wrap { display: flex; gap: 6px; }
-  .hm-days { display: grid; grid-template-rows: repeat(7, 13px); gap: 3px; font-size: .62rem; color: var(--muted); padding-top: 0; }
-  .hm-days span { height: 13px; line-height: 13px; }
+  .hm-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .hm-head .lbl { font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .hm-head .cnt { font-size: .84rem; color: var(--faint); }
+  .hm-head select { font-family: inherit; font-size: .82rem; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 4px 8px; }
+  .hm-outer { overflow-x: auto; padding-bottom: 4px; }
+  .hm2 { display: grid; grid-template-columns: 30px repeat(12, minmax(26px, 1fr)); grid-template-rows: 18px repeat(5, 42px); gap: 2px; min-width: 560px; }
+  .hm2 .mlabel { font-size: .66rem; color: var(--muted); text-align: center; align-self: center; }
+  .hm2 .wlabel { font-size: .62rem; color: var(--faint); align-self: center; }
+  .hm2 .cell { display: flex; align-items: center; justify-content: center; }
+  .hm2 .sq { width: 60%; height: 60%; min-width: 12px; min-height: 12px; border-radius: 5px; background: var(--g0); transition: transform .1s; }
+  .hm2 .cell.has { cursor: pointer; }
+  .hm2 .cell.has:hover .sq { transform: scale(1.12); }
+  .sq.s1 { width: 46%; height: 46%; } .sq.s2 { width: 62%; height: 62%; } .sq.s3 { width: 78%; height: 78%; } .sq.s4 { width: 92%; height: 92%; }
+  .sq.l1 { background: var(--g1); } .sq.l2 { background: var(--g2); } .sq.l3 { background: var(--g3); } .sq.l4 { background: var(--g4); }
+  .cell.past .sq { opacity: .42; }
+  .cell.now .sq { box-shadow: 0 0 0 2px var(--blue); }
+  .hm-legend { display: flex; align-items: center; gap: 6px; font-size: .74rem; color: var(--muted); margin-top: 12px; flex-wrap: wrap; }
+  .hm-legend .sq { width: 13px; height: 13px; border-radius: 4px; background: var(--g0); display: inline-block; }
+  .hm-legend .gap { width: 10px; }
+  .hm-legend .now-s { width: 13px; height: 13px; border-radius: 4px; box-shadow: inset 0 0 0 2px var(--blue); display: inline-block; }
 
-  /* Controls */
-  .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 8px 0 4px; }
-  .controls input[type="search"] { flex: 1; min-width: 180px; }
-  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-  .seg button { border: 0; background: var(--panel); color: var(--muted); padding: 8px 14px; font-family: inherit; font-size: .88rem; cursor: pointer; }
-  .seg button.active { background: var(--coral); color: #fff; }
+  /* Filters */
+  .fgroup { margin: 16px 0; }
+  .fgroup .ftitle { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-family: inherit; font-size: .9rem; color: var(--text); background: var(--chip); border: 1px solid var(--border); border-radius: 999px; padding: 8px 15px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: border-color .12s, background .12s; }
+  .chip:before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+  .chip:hover { border-color: var(--accent-2); }
+  .chip.on { background: var(--chip-on); border-color: var(--chip-on-bd); }
+  .chip.on:before { background: var(--blue); }
+  .chip .th { color: var(--faint); font-size: .82em; }
+  .search { width: 100%; margin-top: 6px; font-family: inherit; font-size: .92rem; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px; outline: none; }
+  .search:focus { border-color: var(--accent-2); }
 
-  /* Race grid */
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
-  .race-card { padding: 16px; position: relative; transition: box-shadow .15s, transform .15s; }
-  .race-card:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(0,0,0,.10); }
-  .race-card.declined { opacity: .55; }
-  .race-card .rdate { font-size: .8rem; color: var(--muted); }
-  .race-card .rname { font-weight: 700; font-size: 1.02rem; margin: 4px 0 8px; }
-  .race-card .rloc { font-size: .85rem; color: var(--muted); }
-  .race-card .rloc:before { content: "📍 "; }
-  .dist { display: inline-block; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; color: #fff; background: var(--coral); margin-bottom: 8px; }
-  .dist.c0 { background: #b8bfc2; } .dist.c1 { background: #67a9cf; }
-  .dist.c2 { background: #e0863b; } .dist.c3 { background: var(--coral); } .dist.c4 { background: #8e3538; }
-  .tag { position: absolute; top: 12px; right: 12px; font-size: .66rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); border: 1px solid var(--border); padding: 2px 7px; border-radius: 999px; }
-  .race-card.flash { animation: flash 1.4s ease; }
-  @keyframes flash { 0%,100% { box-shadow: var(--shadow); } 20% { box-shadow: 0 0 0 3px var(--coral); } }
-  .rdesc { font-size: .82rem; color: var(--muted); margin-top: 8px; white-space: pre-line; max-height: 0; overflow: hidden; transition: max-height .2s; }
-  .race-card.open .rdesc { max-height: 260px; overflow: auto; }
-  .more { font-size: .78rem; color: var(--coral); cursor: pointer; margin-top: 8px; display: inline-block; }
+  .statusline { color: var(--faint); font-size: .86rem; margin: 20px 0 8px; }
 
-  .empty { color: var(--muted); font-size: .9rem; padding: 20px 0; }
-  footer { margin-top: 44px; color: var(--muted); font-size: .82rem; border-top: 1px solid var(--border); padding-top: 16px; }
-  .note { font-size: .82rem; color: var(--muted); background: rgba(222,76,79,.06); border: 1px solid rgba(222,76,79,.2); border-radius: 10px; padding: 10px 12px; margin: 8px 0; display: none; }
+  /* Event rows */
+  .ev { display: grid; grid-template-columns: 92px 1fr; gap: 14px; padding: 20px 0; border-top: 1px solid var(--border); }
+  .ev:first-child { border-top: 0; }
+  .ev.declined { opacity: .5; }
+  .ev-date .dow { color: var(--accent); font-size: .74rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+  .ev-date .dm { display: block; font-size: 1.35rem; font-weight: 700; line-height: 1.1; margin-top: 2px; }
+  .ev-date .yr { color: var(--faint); font-size: .82rem; }
+  .ev-name { font-size: 1.15rem; font-weight: 600; letter-spacing: -.005em; }
+  .ev-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .pill { font-size: .74rem; font-weight: 600; padding: 4px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; }
+  .pill.dist { border: 1px solid var(--border); color: var(--text); }
+  .pill.dist.c1 { border-color: rgba(103,169,207,.5); } .pill.dist.c2 { border-color: rgba(224,134,59,.5); }
+  .pill.dist.c3 { border-color: rgba(222,76,79,.5); } .pill.dist.c4 { border-color: rgba(142,53,56,.7); }
+  .ev-loc { color: var(--muted); font-size: .9rem; display: inline-flex; align-items: center; gap: 5px; }
+  .status { color: var(--muted); }
+  .status:before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .status.s-confirmed { color: var(--blue); }
+  .status.s-pending { color: #e0a53b; }
+  .status.s-declined { color: var(--faint); }
+  .ev.flash { animation: flash 1.4s ease; }
+  @keyframes flash { 0%,100% { background: transparent; } 25% { background: rgba(222,76,79,.14); } }
+  .more { font-size: .82rem; color: var(--accent); cursor: pointer; }
+  .rdesc { font-size: .86rem; color: var(--muted); margin-top: 8px; white-space: pre-line; max-height: 0; overflow: hidden; transition: max-height .2s; }
+  .ev.open .rdesc { max-height: 300px; overflow: auto; }
+
+  .empty { color: var(--muted); font-size: .92rem; padding: 24px 0; }
+  .subhead { font-family: var(--serif); font-size: 1.5rem; margin: 34px 0 4px; }
+  footer { margin-top: 48px; color: var(--faint); font-size: .82rem; border-top: 1px solid var(--border); padding-top: 18px; }
+  .note { font-size: .84rem; color: var(--muted); background: rgba(224,110,115,.08); border: 1px solid rgba(224,110,115,.25); border-radius: 10px; padding: 10px 13px; margin: 14px 0; display: none; }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: .9em; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="top">
-    <div>
-      <h1>🏃 Running Races</h1>
-      <div class="sub">Race schedule, pulled from my Google Calendar</div>
-    </div>
-    <div class="head-right">
+  <div class="eyebrow">
+    <span class="kicker">Running Calendar</span>
+    <span class="head-right">
       <span id="source" class="badge">loading…</span>
       <button id="theme" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">🌙</button>
-    </div>
-  </header>
-
-  <div id="snapNote" class="note"></div>
-
-  <!-- Countdown hero -->
-  <section id="hero" class="panel hero" style="display:none">
-    <div class="days" id="heroDays">–<small>days to go</small></div>
-    <div class="info">
-      <div class="label">Next race</div>
-      <div class="name" id="heroName">—</div>
-      <div class="meta" id="heroMeta"></div>
-    </div>
-  </section>
-
-  <!-- Stats -->
-  <section class="stats" id="stats"></section>
-
-  <!-- Heatmap -->
-  <h2 class="sec">📅 Race calendar heatmap</h2>
-  <section class="panel hm-panel">
-    <div class="hm-head">
-      <div style="font-size:.85rem;color:var(--muted)">Each square is a day · colour = distance</div>
-      <select id="hmYear" aria-label="Heatmap year"></select>
-    </div>
-    <div class="hm-scroll">
-      <div class="hm-months" id="hmMonths"></div>
-      <div class="hm-wrap">
-        <div class="hm-days"><span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span></div>
-        <div class="hm-grid" id="hmGrid"></div>
-      </div>
-    </div>
-    <div class="hm-legend">
-      Less
-      <span class="hm-cell"></span><span class="hm-cell l1"></span><span class="hm-cell l2"></span>
-      <span class="hm-cell l3"></span><span class="hm-cell l4"></span>
-      More · <span style="margin-left:4px">shorter → longer distance</span>
-    </div>
-  </section>
-
-  <!-- Controls -->
-  <h2 class="sec">🔎 Browse races <span class="count" id="browseCount"></span></h2>
-  <div class="controls">
-    <input type="search" id="q" placeholder="Search race or place…" />
-    <select id="fCat"><option value="">All distances</option></select>
-    <select id="fYear"><option value="">All years</option></select>
-    <div class="seg" id="fWhen">
-      <button data-when="upcoming" class="active">Upcoming</button>
-      <button data-when="past">Past</button>
-      <button data-when="all">All</button>
-    </div>
+    </span>
   </div>
 
+  <h1 class="title">Nitipat&rsquo;s<br>Running Event</h1>
+  <div class="summary" id="summary"></div>
+  <div id="snapNote" class="note"></div>
+
+  <hr class="rule" />
+  <div class="countdown" id="countdown" style="display:none"></div>
+
+  <!-- Race intensity heatmap -->
+  <div class="hm-head">
+    <span class="lbl" id="hmTitle">Race intensity</span>
+    <span class="cnt" id="hmCount"></span>
+    <select id="hmYear" aria-label="Heatmap year"></select>
+  </div>
+  <div class="hm-outer"><div class="hm2" id="hm2"></div></div>
+  <div class="hm-legend">
+    Less <span class="sq"></span><span class="sq l1 s2"></span><span class="sq l2 s2"></span><span class="sq l3 s2"></span><span class="sq l4 s2"></span> More
+    <span class="gap"></span> <span class="sq l2 s2" style="opacity:.42"></span> Past
+    <span class="gap"></span> <span class="now-s"></span> This week
+  </div>
+
+  <hr class="rule" />
+
+  <!-- Filters -->
+  <div class="fgroup">
+    <div class="ftitle">Timeline</div>
+    <div class="chips" id="fTimeline">
+      <button class="chip on" data-v="upcoming">Upcoming</button>
+      <button class="chip" data-v="all">All</button>
+    </div>
+  </div>
+  <div class="fgroup">
+    <div class="ftitle">Location</div>
+    <div class="chips" id="fLoc">
+      <button class="chip" data-v="th">Thailand <span class="th">งานไทย</span></button>
+      <button class="chip" data-v="intl">International <span class="th">ตปท</span></button>
+    </div>
+  </div>
+  <div class="fgroup">
+    <div class="ftitle">Distance</div>
+    <div class="chips" id="fDist">
+      <button class="chip" data-v="10k">10K</button>
+      <button class="chip" data-v="15k">15K</button>
+      <button class="chip" data-v="half">21K / Half Marathon</button>
+      <button class="chip" data-v="full">42K / Marathon</button>
+    </div>
+    <input class="search" id="q" type="search" placeholder="Search race or place…" />
+  </div>
+
+  <div class="statusline" id="statusline"></div>
   <div id="lists"></div>
 
   <footer>
-    <div>Data source: my <b>running</b> Google Calendar. The page tries a live read of the public
-      <code>.ics</code> feed; if that isn't reachable it shows a saved snapshot.</div>
-    <div style="margin-top:6px"><a href="index.html">← back to home</a></div>
+    <div>Source: my <b>running</b> Google Calendar. The page tries a live read of the public
+      <code>.ics</code> feed; if that isn&rsquo;t reachable it shows a saved snapshot.</div>
+    <div style="margin-top:6px"><a href="index.html">&larr; back to home</a></div>
   </footer>
 </div>
 
@@ -214,8 +215,7 @@
  * 1. Data: public ICS feed + baked-in snapshot fallback
  * ------------------------------------------------------------------ */
 var CAL_ID = "d596912e7acbba43d63939c2748ebdc60aff0222c060e8b31306b05ba44af85f@group.calendar.google.com";
-var ICS_URL = "https://calendar.google.com/calendar/ical/" +
-  encodeURIComponent(CAL_ID) + "/public/basic.ics";
+var ICS_URL = "https://calendar.google.com/calendar/ical/" + encodeURIComponent(CAL_ID) + "/public/basic.ics";
 // Google's ICS endpoint sends no CORS headers, so fetch it through a CORS relay.
 var PROXIES = [
   function (u) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
@@ -223,10 +223,11 @@ var PROXIES = [
 ];
 
 // Snapshot captured from the calendar on 2026-07-20 (fallback + heatmap seed).
+// intl: race abroad ("with travel").  status: "pending" (lotto/ballot) | "declined" (skipped).
 var SNAPSHOT_DATE = "2026-07-20";
 var SNAPSHOT = [
   {name:"17th Siriraj Walk and Run - 21k", date:"2025-04-27", loc:"Siriraj Hospital, Bangkok"},
-  {name:"KUL city day half marathon - 21k", date:"2025-05-04", loc:"Kuala Lumpur, Malaysia"},
+  {name:"KUL city day half marathon - 21k", date:"2025-05-04", loc:"Kuala Lumpur, Malaysia", intl:true},
   {name:"Huahin marathon - 42k", date:"2025-05-11", loc:"Hua Hin, Prachuap Khiri Khan"},
   {name:"Run for relife - 11k", date:"2025-05-25", loc:"Nonthaburi"},
   {name:"วิ่งดอกบัวคู่ - 21k", date:"2025-06-15", loc:"Suan Luang Rama IX, Bangkok"},
@@ -243,7 +244,7 @@ var SNAPSHOT = [
   {name:"30k", date:"2025-10-05", loc:""},
   {name:"แปลงยาว 33k", date:"2025-10-12", loc:""},
   {name:"10k", date:"2025-10-19", loc:""},
-  {name:"Kanazawa marathon", date:"2025-10-26", loc:"Kanazawa, Japan"},
+  {name:"Kanazawa marathon", date:"2025-10-26", loc:"Kanazawa, Japan", intl:true},
   {name:"Walk run bike - 12k", date:"2025-11-02", loc:""},
   {name:"Bangsan 42k", date:"2025-11-09", loc:"Bang Saen, Chon Buri"},
   {name:"Pocari Sweat Trial Run Thailand 2025 - 30k", date:"2025-11-15", loc:"Chiang Mai"},
@@ -252,9 +253,9 @@ var SNAPSHOT = [
   {name:"Bangsaen 21", date:"2025-12-21", loc:"Bang Saen, Chon Buri"},
   {name:"Pocari 21k", date:"2026-01-18", loc:""},
   {name:"Cmu marathon - 42k", date:"2026-02-01", loc:"Chiang Mai"},
-  {name:"Osaka marathon", date:"2026-02-22", loc:"Osaka, Japan"},
+  {name:"Osaka marathon", date:"2026-02-22", loc:"Osaka, Japan", intl:true},
   {name:"RUN FOR RELIFE 2026 - 11.5k", date:"2026-03-29", loc:""},
-  {name:"Beijing half marathon", date:"2026-04-12", loc:"Beijing, China"},
+  {name:"Beijing half marathon", date:"2026-04-12", loc:"Beijing, China", intl:true},
   {name:"Sketcher - 10k", date:"2026-05-31", loc:"Chulalongkorn University, Bangkok"},
   {name:"Sattahip 10k", date:"2026-06-13", loc:"Sattahip, Chon Buri"},
   {name:"Nonthaburi night run - 10k", date:"2026-06-20", loc:"Nonthaburi"},
@@ -272,11 +273,11 @@ var SNAPSHOT = [
   {name:"Padriew 21k", date:"2026-09-06", loc:"Chachoengsao"},
   {name:"รัญจวน 1st RUN 10K", date:"2026-09-19", loc:"บางกะเจ้า",
     desc:"กิจกรรมรัญจวน 1st RUN 19 กันยายน 2026 ที่บางกะเจ้า ~10 กม. ของรางวัล: เสื้อวิ่ง, Badge, ผ้าโพกหัว, โปสเตอร์ A3."},
-  {name:"Sanrio Characters Half Marathon", date:"2026-09-27", loc:"",
+  {name:"Sanrio Characters Half Marathon", date:"2026-09-27", loc:"Japan", intl:true,
     desc:"21 km (Half Marathon), Registration ID: NPJMYF55."},
   {name:"PEA Mini Marathon 2026 - 10k", date:"2026-10-04", loc:""},
-  {name:"Tokyo Legacy Half Marathon - 21km", date:"2026-10-18", loc:"Tokyo, Japan", status:"declined"},
-  {name:"Chengdu Marathon 2026 (Half Marathon - 21K)", date:"2026-10-25", loc:"Chengdu, China"},
+  {name:"Tokyo Legacy Half Marathon - 21km", date:"2026-10-18", loc:"Tokyo, Japan", intl:true, status:"declined"},
+  {name:"Chengdu Marathon 2026 (Half Marathon - 21K)", date:"2026-10-25", loc:"Chengdu, China", intl:true, status:"pending"},
   {name:"SAUCONY BKK10K", date:"2026-10-25", loc:"Bangkok", desc:"10 KM race"},
   {name:"Walk run bike - 11k", date:"2026-11-01", loc:"Nonthaburi"},
   {name:"Bangsaen 42k", date:"2026-11-15", loc:"Bangsaen Beach, Chon Buri"},
@@ -289,50 +290,64 @@ var SNAPSHOT = [
  * 2. Parsing helpers
  * ------------------------------------------------------------------ */
 function parseDistance(name) {
-  var km = null;
-  var re = /(\d+(?:\.\d+)?)\s*k(?:m)?(?![a-z])/gi, m, last = null;
-  while ((m = re.exec(name)) !== null) { last = m[1]; }
+  var km = null, re = /(\d+(?:\.\d+)?)\s*k(?:m)?(?![a-z])/gi, m, last = null;
+  while ((m = re.exec(name)) !== null) last = m[1];
   if (last !== null) km = parseFloat(last);
   if (km === null) {
     var low = name.toLowerCase();
     if (/\bhalf\b/.test(low) && /marathon/.test(low)) km = 21.1;
     else if (/marathon/.test(low)) km = 42.195;
   }
-  if (km === null) { // bare number like "Bangsaen 21"
+  if (km === null) {
     var b = name.match(/\b(\d{1,2}(?:\.\d+)?)\b/);
     if (b) { var v = parseFloat(b[1]); if (v >= 3 && v <= 60) km = v; }
   }
   return km;
 }
 function categoryOf(km) {
-  if (km === null) return {key:"other", label:"Other", cls:"c0"};
-  if (km < 8)   return {key:"short", label:"Fun run (<8K)", cls:"c1"};
-  if (km < 13)  return {key:"10k",   label:"10K", cls:"c2"};
-  if (km < 30)  return {key:"half",  label:"Half / 21K", cls:"c3"};
-  return {key:"full", label:"Full / 42K+", cls:"c4"};
+  if (km === null) return { key:"other", label:"Other", cls:"c0" };
+  if (km < 8)  return { key:"short", label:"Fun run", cls:"c1" };
+  if (km < 13) return { key:"10k",  label:"10K",  cls:"c2" };
+  if (km < 18) return { key:"15k",  label:"15K",  cls:"c2" };
+  if (km < 30) return { key:"half", label:"21K / Half", cls:"c3" };
+  return { key:"full", label:"42K / Full", cls:"c4" };
 }
-function hmLevel(km) {
-  if (km === null) return 1;
-  if (km < 8) return 1; if (km < 13) return 2; if (km < 30) return 3; return 4;
+function distDisplay(km) {
+  if (km === null) return "—";
+  var k = km;
+  if (km === 42.195) k = 42; else if (km === 21.1) k = 21;
+  return k + "K";
+}
+var INTL_KW = ["malaysia","kuala lumpur","japan","osaka","kanazawa","tokyo","china","beijing",
+  "chengdu","singapore","korea","seoul","hong kong","vietnam","taiwan","indonesia","jakarta","laos"];
+function detectIntl(name, loc) {
+  var s = (name + " " + loc).toLowerCase();
+  return INTL_KW.some(function (k) { return s.indexOf(k) >= 0; });
+}
+function normStatus(s) {
+  s = (s || "").toLowerCase();
+  if (s === "declined" || s === "cancelled" || s === "canceled") return "declined";
+  if (s === "pending" || s === "lotto" || s === "needsaction" || s === "tentative") return "pending";
+  return "confirmed";
 }
 function dateFromYMD(s) { var p = s.split("-"); return new Date(+p[0], +p[1]-1, +p[2]); }
 
-function makeEvent(name, dateObj, loc, desc, status) {
+function makeEvent(name, dateObj, loc, desc, status, intl) {
   var km = parseDistance(name);
   return {
     name: name, date: dateObj, loc: loc || "", desc: desc || "",
-    status: status || "", km: km, cat: categoryOf(km), year: dateObj.getFullYear()
+    status: normStatus(status), intl: (intl != null) ? !!intl : detectIntl(name, loc || ""),
+    km: km, cat: categoryOf(km), year: dateObj.getFullYear()
   };
 }
 function fromSnapshot() {
-  return SNAPSHOT.map(function (e) { return makeEvent(e.name, dateFromYMD(e.date), e.loc, e.desc, e.status); });
+  return SNAPSHOT.map(function (e) { return makeEvent(e.name, dateFromYMD(e.date), e.loc, e.desc, e.status, e.intl); });
 }
 
 /* Minimal ICS (VEVENT) parser */
 function parseICS(text) {
-  var raw = text.replace(/\r\n/g, "\n").split("\n");
-  var lines = [];
-  for (var i = 0; i < raw.length; i++) {           // unfold folded lines
+  var raw = text.replace(/\r\n/g, "\n").split("\n"), lines = [];
+  for (var i = 0; i < raw.length; i++) {
     if ((raw[i][0] === " " || raw[i][0] === "\t") && lines.length) lines[lines.length-1] += raw[i].slice(1);
     else lines.push(raw[i]);
   }
@@ -345,15 +360,16 @@ function parseICS(text) {
       if (cur && cur.SUMMARY && cur.DTSTART) {
         var d = cur.DTSTART.replace(/[^0-9T]/g, "");
         var y = +d.slice(0,4), mo = +d.slice(4,6)-1, da = +d.slice(6,8);
-        if (y) events.push(makeEvent(unesc(cur.SUMMARY), new Date(y, mo, da), cur.LOCATION ? unesc(cur.LOCATION) : "", cur.DESCRIPTION ? unesc(cur.DESCRIPTION) : "", ""));
+        if (y) events.push(makeEvent(unesc(cur.SUMMARY), new Date(y, mo, da),
+          cur.LOCATION ? unesc(cur.LOCATION) : "", cur.DESCRIPTION ? unesc(cur.DESCRIPTION) : "",
+          cur.STATUS === "CANCELLED" ? "declined" : "", null));
       }
       cur = null; continue;
     }
     if (!cur) continue;
     var c = ln.indexOf(":"); if (c < 0) continue;
-    var keyfull = ln.slice(0, c), val = ln.slice(c+1);
-    var key = keyfull.split(";")[0];
-    if (key === "SUMMARY" || key === "LOCATION" || key === "DESCRIPTION" || key === "UID") cur[key] = val;
+    var key = ln.slice(0, c).split(";")[0], val = ln.slice(c+1);
+    if (key === "SUMMARY" || key === "LOCATION" || key === "DESCRIPTION" || key === "UID" || key === "STATUS") cur[key] = val;
     else if (key === "DTSTART") cur.DTSTART = val;
   }
   return events;
@@ -363,23 +379,21 @@ function parseICS(text) {
  * 3. State + load
  * ------------------------------------------------------------------ */
 var ALL = [];
-var filter = { q: "", cat: "", year: "", when: "upcoming" };
+var filter = { timeline: "upcoming", locs: {}, dists: {}, q: "" };
 var today = (function () { var t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); })();
 
 function setSource(kind) {
   var el = document.getElementById("source");
-  if (kind === "live") { el.textContent = "● Live from Calendar"; el.className = "badge live"; }
+  if (kind === "live") { el.textContent = "● Live"; el.className = "badge live"; }
   else {
     el.textContent = "● Snapshot " + SNAPSHOT_DATE; el.className = "badge snap";
     var n = document.getElementById("snapNote");
     n.style.display = "block";
-    n.innerHTML = "Showing a saved snapshot (" + SNAPSHOT_DATE + "). The live calendar feed couldn't be reached — this works only if the running calendar is set to <b>public</b>.";
+    n.innerHTML = "Showing a saved snapshot (" + SNAPSHOT_DATE + "). The live feed couldn't be reached — this works only if the running calendar is set to <b>public</b>.";
   }
 }
-
 function fetchWithTimeout(url, ms) {
-  var ctrl = new AbortController();
-  var t = setTimeout(function () { ctrl.abort(); }, ms);
+  var ctrl = new AbortController(), t = setTimeout(function () { ctrl.abort(); }, ms);
   return fetch(url, { signal: ctrl.signal }).then(function (r) {
     clearTimeout(t); if (!r.ok) throw new Error("HTTP " + r.status); return r.text();
   });
@@ -387,237 +401,239 @@ function fetchWithTimeout(url, ms) {
 function tryLive(i) {
   if (i >= PROXIES.length) return Promise.reject();
   return fetchWithTimeout(PROXIES[i](ICS_URL), 9000).then(function (txt) {
-    var ev = parseICS(txt);
-    if (!ev.length) throw new Error("empty");
-    return ev;
+    var ev = parseICS(txt); if (!ev.length) throw new Error("empty"); return ev;
   }).catch(function () { return tryLive(i + 1); });
 }
-
 function boot() {
-  tryLive(0).then(function (ev) {
-    ALL = ev; setSource("live"); render();
-  }).catch(function () {
-    ALL = fromSnapshot(); setSource("snapshot"); render();
-  });
+  tryLive(0).then(function (ev) { ALL = ev; setSource("live"); render(); })
+            .catch(function () { ALL = fromSnapshot(); setSource("snapshot"); render(); });
 }
 
 /* ------------------------------------------------------------------ *
  * 4. Rendering
  * ------------------------------------------------------------------ */
-var fmtLong = new Intl.DateTimeFormat("en-GB", { weekday:"short", day:"numeric", month:"short", year:"numeric" });
-var fmtDay  = new Intl.DateTimeFormat("en-GB", { day:"numeric", month:"short", year:"numeric" });
-
-function distLabel(e) { return e.km === null ? "—" : (e.km + " km"); }
+var fmtDOW = new Intl.DateTimeFormat("en-US", { weekday: "short" });
+var fmtDM  = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" });
+var fmtFull = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
 
 function render() {
   ALL.sort(function (a, b) { return a.date - b.date; });
-  renderHero();
-  renderStats();
-  buildFilters();
-  buildHeatmapYears();
+  renderSummary();
+  renderCountdown();
+  buildYears();
   renderHeatmap();
   renderLists();
 }
 
-function renderHero() {
-  var next = ALL.filter(function (e) { return e.date >= today && e.status !== "declined"; })[0];
-  var hero = document.getElementById("hero");
-  if (!next) { hero.style.display = "none"; return; }
-  hero.style.display = "flex";
-  var days = Math.round((next.date - today) / 86400000);
-  document.getElementById("heroDays").innerHTML =
-    (days === 0 ? "Today" : days) + "<small>" + (days === 0 ? "race day!" : "days to go") + "</small>";
-  document.getElementById("heroName").textContent = next.name;
-  document.getElementById("heroMeta").innerHTML =
-    "<b>" + fmtLong.format(next.date) + "</b>" +
-    (next.km !== null ? " · " + distLabel(next) : "") +
-    (next.loc ? " · " + escapeHtml(next.loc) : "");
-}
-
-function renderStats() {
-  var known = ALL.filter(function (e) { return e.km !== null; });
-  var totalKm = known.reduce(function (s, e) { return s + e.km; }, 0);
-  var upcoming = ALL.filter(function (e) { return e.date >= today; }).length;
-  var fulls = ALL.filter(function (e) { return e.km !== null && e.km >= 30; }).length;
-  var halfs = ALL.filter(function (e) { return e.km !== null && e.km >= 13 && e.km < 30; }).length;
-  var tiles = [
-    [ALL.length, "Races"],
-    [Math.round(totalKm).toLocaleString(), "Total km"],
-    [upcoming, "Upcoming"],
-    [halfs, "Half / 21K"],
-    [fulls, "Full / 42K+"]
+function renderSummary() {
+  var years = ALL.map(function (e) { return e.year; });
+  var minY = Math.min.apply(null, years), maxY = Math.max.apply(null, years);
+  var upcoming = ALL.filter(function (e) { return e.date >= today && e.status !== "declined"; }).length;
+  var travel = ALL.filter(function (e) { return e.intl; }).length;
+  var pending = ALL.filter(function (e) { return e.status === "pending"; }).length;
+  var km = ALL.filter(function (e) { return e.km !== null && e.status !== "declined"; })
+              .reduce(function (s, e) { return s + e.km; }, 0);
+  var range = (minY === maxY) ? String(minY) : (minY + " – " + maxY);
+  var parts = [
+    range,
+    "<b>" + ALL.length + "</b> events",
+    "<b>" + upcoming + "</b> upcoming",
+    "<b>" + travel + "</b> with travel",
+    "<b>" + pending + "</b> lotto / pending",
+    "<b>" + Math.round(km).toLocaleString() + "</b> km"
   ];
-  document.getElementById("stats").innerHTML = tiles.map(function (t) {
-    return '<div class="panel stat"><div class="num">' + t[0] + '</div><div class="lbl">' + t[1] + '</div></div>';
-  }).join("");
+  document.getElementById("summary").innerHTML =
+    parts.join('<span class="sep">/</span>');
 }
 
-function buildFilters() {
-  var cats = [["short","Fun run (<8K)"],["10k","10K"],["half","Half / 21K"],["full","Full / 42K+"],["other","Other"]];
-  var present = {}; ALL.forEach(function (e) { present[e.cat.key] = true; });
-  var sel = document.getElementById("fCat");
-  sel.innerHTML = '<option value="">All distances</option>' +
-    cats.filter(function (c) { return present[c[0]]; })
-        .map(function (c) { return '<option value="' + c[0] + '">' + c[1] + '</option>'; }).join("");
-  var years = {}; ALL.forEach(function (e) { years[e.year] = true; });
-  var ys = Object.keys(years).sort();
-  document.getElementById("fYear").innerHTML = '<option value="">All years</option>' +
-    ys.map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join("");
-  sel.value = filter.cat; document.getElementById("fYear").value = filter.year;
+function renderCountdown() {
+  var next = ALL.filter(function (e) { return e.date >= today && e.status !== "declined"; })[0];
+  var el = document.getElementById("countdown");
+  if (!next) { el.style.display = "none"; return; }
+  el.style.display = "flex";
+  var days = Math.round((next.date - today) / 86400000);
+  el.innerHTML = "Next race: <b>" + escapeHtml(next.name) + "</b> · " +
+    (days === 0 ? '<span class="n">today</span>' : '<span class="n">' + days + '</span> days to go');
 }
 
+/* --- Race-intensity heatmap: month (cols) × week-of-month (rows) --- */
+function buildYears() {
+  var ys = {}; ALL.forEach(function (e) { ys[e.year] = true; });
+  var arr = Object.keys(ys).sort();
+  var sel = document.getElementById("hmYear"), prev = sel.value;
+  sel.innerHTML = arr.map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join("");
+  sel.value = prev || (ys[today.getFullYear()] ? String(today.getFullYear()) : arr[arr.length - 1]);
+}
+function weekOfMonth(day) { return Math.min(4, Math.floor((day - 1) / 7)); } // 0..4
+function renderHeatmap() {
+  var year = +document.getElementById("hmYear").value;
+  var yearEvents = ALL.filter(function (e) { return e.year === year && e.status !== "declined"; });
+  document.getElementById("hmTitle").textContent = year + " Race intensity";
+  document.getElementById("hmCount").textContent =
+    yearEvents.length + " races across 12 months";
+
+  // bucket[month][week] = array of races
+  var buckets = {};
+  yearEvents.forEach(function (e) {
+    var mo = e.date.getMonth(), wk = weekOfMonth(e.date.getDate());
+    (buckets[mo + ":" + wk] = buckets[mo + ":" + wk] || []).push(e);
+  });
+
+  var monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  var grid = document.getElementById("hm2");
+  grid.innerHTML = "";
+  var frag = document.createDocumentFragment();
+
+  frag.appendChild(el("div", "", ""));                       // corner
+  monthNames.forEach(function (mn) { frag.appendChild(el("div", "mlabel", mn)); });
+
+  for (var wk = 0; wk < 5; wk++) {
+    frag.appendChild(el("div", "wlabel", "W" + (wk + 1)));
+    for (var mo = 0; mo < 12; mo++) {
+      var races = buckets[mo + ":" + wk];
+      var cell = document.createElement("div");
+      cell.className = "cell";
+      var sq = document.createElement("div");
+      sq.className = "sq";
+      if (races) {
+        var n = races.length;
+        var lvl = n >= 3 ? 4 : (n === 2 ? 3 : (races[0].km !== null && races[0].km >= 30 ? 2 : 1));
+        sq.className = "sq s" + Math.min(4, n + 1) + " l" + lvl;
+        cell.className = "cell has";
+        var names = races.map(function (r) { return r.name; }).join(", ");
+        cell.title = monthNames[mo] + " W" + (wk + 1) + " " + year + " · " + names;
+        (function (r0) { cell.onclick = function () { jumpTo(r0); }; })(races[0]);
+      }
+      // past / current-week markers
+      var wkStart = wk * 7 + 1, dim = new Date(year, mo + 1, 0).getDate();
+      var wkEnd = Math.min(dim, wkStart + 6);
+      var endDate = new Date(year, mo, wkEnd), startDate = new Date(year, mo, wkStart);
+      if (endDate < today) cell.classList.add("past");
+      else if (startDate <= today && today <= endDate) cell.classList.add("now");
+      cell.appendChild(sq);
+      frag.appendChild(cell);
+    }
+  }
+  grid.appendChild(frag);
+}
+function el(tag, cls, txt) { var d = document.createElement(tag); if (cls) d.className = cls; if (txt) d.textContent = txt; return d; }
+
+/* --- Filters + list --- */
 function matches(e) {
-  if (filter.cat && e.cat.key !== filter.cat) return false;
-  if (filter.year && String(e.year) !== filter.year) return false;
-  if (filter.when === "upcoming" && e.date < today) return false;
-  if (filter.when === "past" && e.date >= today) return false;
+  if (filter.timeline === "upcoming" && e.date < today) return false;
+  var lk = Object.keys(filter.locs);
+  if (lk.length) {
+    var wantTh = filter.locs.th, wantIntl = filter.locs.intl;
+    if (!((wantTh && !e.intl) || (wantIntl && e.intl))) return false;
+  }
+  var dk = Object.keys(filter.dists);
+  if (dk.length && !filter.dists[e.cat.key]) return false;
   if (filter.q) {
     var q = filter.q.toLowerCase();
     if ((e.name + " " + e.loc).toLowerCase().indexOf(q) < 0) return false;
   }
   return true;
 }
-
 function renderLists() {
   var shown = ALL.filter(matches);
-  document.getElementById("browseCount").textContent = shown.length + " shown";
+  var pending = shown.filter(function (e) { return e.status === "pending"; }).length;
+  document.getElementById("statusline").textContent =
+    "Showing " + shown.length + " of " + ALL.length + " events · " +
+    (filter.timeline === "upcoming" ? "upcoming only" : "all races") +
+    (pending ? " · " + pending + " lotto / pending" : "");
+
   var host = document.getElementById("lists");
-  if (filter.when === "all") {
+  if (filter.timeline === "all") {
     var up = shown.filter(function (e) { return e.date >= today; });
     var pa = shown.filter(function (e) { return e.date < today; }).reverse();
-    host.innerHTML = section("Upcoming", up) + section("Past", pa);
-  } else if (filter.when === "past") {
-    host.innerHTML = section("Past", shown.slice().reverse());
+    host.innerHTML = block("Upcoming", up) + block("Past", pa);
   } else {
-    host.innerHTML = section("Upcoming", shown);
+    host.innerHTML = shown.length ? shown.map(rowHtml).join("") : '<div class="empty">No races match these filters.</div>';
   }
-  wireCards();
+  wireRows();
 }
-function section(title, arr) {
-  if (!arr.length) return '<h2 class="sec">' + title + '</h2><div class="empty">No races match.</div>';
-  return '<h2 class="sec">' + title + ' <span class="count">' + arr.length + '</span></h2>' +
-    '<div class="grid">' + arr.map(cardHtml).join("") + '</div>';
+function block(title, arr) {
+  if (!arr.length) return "";
+  return '<div class="subhead">' + title + '</div>' + arr.map(rowHtml).join("");
 }
-function cardHtml(e) {
+function rowHtml(e) {
   var idx = ALL.indexOf(e);
-  var declined = e.status === "declined";
+  var st = e.status === "declined" ? ["s-declined", "Skipped"] :
+           e.status === "pending"  ? ["s-pending", "Lotto / pending"] :
+           ["s-confirmed", "Confirmed"];
   var hasDesc = e.desc && e.desc.length > 0;
-  return '<div class="race-card panel' + (declined ? ' declined' : '') + '" id="race-' + idx + '">' +
-    (declined ? '<span class="tag">skipped</span>' : '') +
-    '<span class="dist ' + e.cat.cls + '">' + distLabel(e) + '</span>' +
-    '<div class="rdate">' + fmtLong.format(e.date) + '</div>' +
-    '<div class="rname">' + escapeHtml(e.name) + '</div>' +
-    (e.loc ? '<div class="rloc">' + escapeHtml(e.loc) + '</div>' : '') +
-    (hasDesc ? '<span class="more" data-idx="' + idx + '">details ▾</span><div class="rdesc">' + escapeHtml(e.desc) + '</div>' : '') +
-    '</div>';
+  return '<div class="ev' + (e.status === "declined" ? " declined" : "") + '" id="race-' + idx + '">' +
+    '<div class="ev-date"><span class="dow">' + fmtDOW.format(e.date).toUpperCase() + '</span>' +
+      '<span class="dm">' + fmtDM.format(e.date) + '</span>' +
+      '<span class="yr">' + e.year + '</span></div>' +
+    '<div class="ev-body"><div class="ev-name">' + escapeHtml(e.name) + '</div>' +
+      '<div class="ev-row">' +
+        '<span class="pill dist ' + e.cat.cls + '">' + distDisplay(e.km) + '</span>' +
+        (e.loc ? '<span class="ev-loc">📍 ' + escapeHtml(e.loc) + '</span>' : '') +
+        (e.intl ? '<span class="ev-loc">✈️</span>' : '') +
+        '<span class="pill status ' + st[0] + '">' + st[1] + '</span>' +
+        (hasDesc ? '<span class="more" data-idx="' + idx + '">details ▾</span>' : '') +
+      '</div>' +
+      (hasDesc ? '<div class="rdesc">' + escapeHtml(e.desc) + '</div>' : '') +
+    '</div></div>';
 }
-function wireCards() {
+function wireRows() {
   Array.prototype.forEach.call(document.querySelectorAll(".more"), function (m) {
     m.onclick = function () {
-      var card = document.getElementById("race-" + m.getAttribute("data-idx"));
-      card.classList.toggle("open");
-      m.textContent = card.classList.contains("open") ? "details ▴" : "details ▾";
+      var row = document.getElementById("race-" + m.getAttribute("data-idx"));
+      row.classList.toggle("open");
+      m.textContent = row.classList.contains("open") ? "details ▴" : "details ▾";
     };
   });
 }
-
-/* Heatmap */
-function buildHeatmapYears() {
-  var years = {}; ALL.forEach(function (e) { years[e.year] = true; });
-  var ys = Object.keys(years).sort();
-  var sel = document.getElementById("hmYear");
-  var prev = sel.value;
-  sel.innerHTML = ys.map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join("");
-  sel.value = prev || (years[today.getFullYear()] ? String(today.getFullYear()) : ys[ys.length-1]);
-}
-function renderHeatmap() {
-  var year = +document.getElementById("hmYear").value;
-  var byDay = {};
-  ALL.forEach(function (e) {
-    if (e.year !== year) return;
-    var k = e.date.getMonth() + "-" + e.date.getDate();
-    (byDay[k] = byDay[k] || []).push(e);
-  });
-  var start = new Date(year, 0, 1);
-  var grid = document.getElementById("hmGrid");
-  var months = document.getElementById("hmMonths");
-  grid.innerHTML = ""; months.innerHTML = "";
-  // pad so column 1 starts on Sunday
-  var lead = start.getDay();
-  var monthCols = {}; var col = 0;
-  for (var p = 0; p < lead; p++) { var s = document.createElement("div"); s.className = "hm-cell"; s.style.visibility = "hidden"; grid.appendChild(s); }
-  var d = new Date(start);
-  while (d.getFullYear() === year) {
-    if (d.getDay() === 0) col++;
-    var key = d.getMonth() + "-" + d.getDate();
-    var races = byDay[key];
-    var cell = document.createElement("div");
-    cell.className = "hm-cell" + (races ? " race l" + Math.max.apply(null, races.map(function (r) { return hmLevel(r.km); })) : "");
-    if (races) {
-      var names = races.map(function (r) { return r.name + (r.km !== null ? " (" + r.km + "k)" : ""); }).join(", ");
-      cell.title = fmtDay.format(d) + " — " + names;
-      (function (r0) { cell.onclick = function () { jumpTo(r0); }; })(races[0]);
-    } else {
-      cell.title = fmtDay.format(d);
-    }
-    grid.appendChild(cell);
-    if (d.getDate() === 1) monthCols[col] = d.toLocaleDateString("en-US", { month: "short" });
-    d.setDate(d.getDate() + 1);
-  }
-  // month labels roughly aligned to columns
-  var totalCols = col + 1;
-  months.style.gridTemplateColumns = "repeat(" + totalCols + ", 16px)";
-  var lbl = "";
-  for (var cc = 1; cc <= totalCols; cc++) lbl += '<div>' + (monthCols[cc] ? monthCols[cc] : "") + '</div>';
-  months.innerHTML = lbl;
-}
 function jumpTo(e) {
-  // make sure the race is visible: switch to "all", clear filters that would hide it
-  filter.when = "all"; filter.cat = ""; filter.year = ""; filter.q = "";
-  syncControls();
+  filter.timeline = "all"; filter.locs = {}; filter.dists = {}; filter.q = "";
+  syncChips(); document.getElementById("q").value = "";
   renderLists();
-  var idx = ALL.indexOf(e);
-  var card = document.getElementById("race-" + idx);
-  if (card) {
-    card.scrollIntoView({ behavior: "smooth", block: "center" });
-    card.classList.remove("flash"); void card.offsetWidth; card.classList.add("flash");
-  }
+  var row = document.getElementById("race-" + ALL.indexOf(e));
+  if (row) { row.scrollIntoView({ behavior: "smooth", block: "center" });
+             row.classList.remove("flash"); void row.offsetWidth; row.classList.add("flash"); }
 }
 
 /* ------------------------------------------------------------------ *
- * 5. Controls wiring
+ * 5. Controls
  * ------------------------------------------------------------------ */
-function syncControls() {
-  document.getElementById("q").value = filter.q;
-  document.getElementById("fCat").value = filter.cat;
-  document.getElementById("fYear").value = filter.year;
-  Array.prototype.forEach.call(document.querySelectorAll("#fWhen button"), function (b) {
-    b.classList.toggle("active", b.getAttribute("data-when") === filter.when);
+function syncChips() {
+  setActive("#fTimeline", function (v) { return v === filter.timeline; });
+  setActive("#fLoc", function (v) { return !!filter.locs[v]; });
+  setActive("#fDist", function (v) { return !!filter.dists[v]; });
+}
+function setActive(sel, isOn) {
+  Array.prototype.forEach.call(document.querySelectorAll(sel + " .chip"), function (b) {
+    b.classList.toggle("on", isOn(b.getAttribute("data-v")));
   });
 }
-document.getElementById("q").addEventListener("input", function (e) { filter.q = e.target.value; renderLists(); });
-document.getElementById("fCat").addEventListener("change", function (e) { filter.cat = e.target.value; renderLists(); });
-document.getElementById("fYear").addEventListener("change", function (e) { filter.year = e.target.value; renderLists(); });
-Array.prototype.forEach.call(document.querySelectorAll("#fWhen button"), function (b) {
-  b.addEventListener("click", function () { filter.when = b.getAttribute("data-when"); syncControls(); renderLists(); });
+document.querySelectorAll("#fTimeline .chip").forEach(function (b) {
+  b.addEventListener("click", function () { filter.timeline = b.getAttribute("data-v"); syncChips(); renderLists(); });
 });
+function toggleSet(setObj, v) { if (setObj[v]) delete setObj[v]; else setObj[v] = true; }
+document.querySelectorAll("#fLoc .chip").forEach(function (b) {
+  b.addEventListener("click", function () { toggleSet(filter.locs, b.getAttribute("data-v")); syncChips(); renderLists(); });
+});
+document.querySelectorAll("#fDist .chip").forEach(function (b) {
+  b.addEventListener("click", function () { toggleSet(filter.dists, b.getAttribute("data-v")); syncChips(); renderLists(); });
+});
+document.getElementById("q").addEventListener("input", function (e) { filter.q = e.target.value; renderLists(); });
 document.getElementById("hmYear").addEventListener("change", renderHeatmap);
 
-/* Theme toggle */
+/* Theme toggle (defaults to dark) */
 (function () {
   var btn = document.getElementById("theme");
+  function sysDark() { return !window.matchMedia("(prefers-color-scheme: light)").matches; }
   function apply(t) {
     document.documentElement.setAttribute("data-theme", t);
     btn.textContent = t === "dark" ? "☀️" : "🌙";
     try { localStorage.setItem("run-theme", t); } catch (e) {}
   }
   var saved; try { saved = localStorage.getItem("run-theme"); } catch (e) {}
-  if (saved) apply(saved);
-  else btn.textContent = window.matchMedia("(prefers-color-scheme: dark)").matches ? "☀️" : "🌙";
+  apply(saved || (sysDark() ? "dark" : "light"));
   btn.addEventListener("click", function () {
-    var cur = document.documentElement.getAttribute("data-theme");
-    if (!cur) cur = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    apply(cur === "dark" ? "light" : "dark");
+    apply(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
   });
 })();
 
