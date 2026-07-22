@@ -214,15 +214,12 @@
 /* ------------------------------------------------------------------ *
  * 1. Data: public ICS feed + baked-in snapshot fallback
  * ------------------------------------------------------------------ */
-var CAL_ID = "d596912e7acbba43d63939c2748ebdc60aff0222c060e8b31306b05ba44af85f@group.calendar.google.com";
-var ICS_URL = "https://calendar.google.com/calendar/ical/" + encodeURIComponent(CAL_ID) + "/public/basic.ics";
-// Google's ICS endpoint sends no CORS headers, so fetch it through a CORS relay.
-var PROXIES = [
-  function (u) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
-  function (u) { return "https://corsproxy.io/?url=" + encodeURIComponent(u); }
-];
+// races.json is written by a daily Claude job that reads the private "running"
+// Google Calendar and commits the result to this repo. The page loads it
+// same-origin — no CORS, no proxy, no API key. See scripts/build-races.mjs.
+var RACES_URL = "races.json";
 
-// Snapshot captured from the calendar on 2026-07-20 (fallback + heatmap seed).
+// Baked-in snapshot: the ultimate offline fallback if races.json can't be loaded.
 // intl: race abroad ("with travel").  status: "pending" (lotto/ballot) | "declined" (skipped).
 var SNAPSHOT_DATE = "2026-07-20";
 var SNAPSHOT = [
@@ -344,37 +341,6 @@ function fromSnapshot() {
   return SNAPSHOT.map(function (e) { return makeEvent(e.name, dateFromYMD(e.date), e.loc, e.desc, e.status, e.intl); });
 }
 
-/* Minimal ICS (VEVENT) parser */
-function parseICS(text) {
-  var raw = text.replace(/\r\n/g, "\n").split("\n"), lines = [];
-  for (var i = 0; i < raw.length; i++) {
-    if ((raw[i][0] === " " || raw[i][0] === "\t") && lines.length) lines[lines.length-1] += raw[i].slice(1);
-    else lines.push(raw[i]);
-  }
-  function unesc(v) { return v.replace(/\\n/gi, " ").replace(/\\,/g, ",").replace(/\\;/g, ";").replace(/\\\\/g, "\\"); }
-  var events = [], cur = null;
-  for (var j = 0; j < lines.length; j++) {
-    var ln = lines[j];
-    if (ln === "BEGIN:VEVENT") { cur = {}; continue; }
-    if (ln === "END:VEVENT") {
-      if (cur && cur.SUMMARY && cur.DTSTART) {
-        var d = cur.DTSTART.replace(/[^0-9T]/g, "");
-        var y = +d.slice(0,4), mo = +d.slice(4,6)-1, da = +d.slice(6,8);
-        if (y) events.push(makeEvent(unesc(cur.SUMMARY), new Date(y, mo, da),
-          cur.LOCATION ? unesc(cur.LOCATION) : "", cur.DESCRIPTION ? unesc(cur.DESCRIPTION) : "",
-          cur.STATUS === "CANCELLED" ? "declined" : "", null));
-      }
-      cur = null; continue;
-    }
-    if (!cur) continue;
-    var c = ln.indexOf(":"); if (c < 0) continue;
-    var key = ln.slice(0, c).split(";")[0], val = ln.slice(c+1);
-    if (key === "SUMMARY" || key === "LOCATION" || key === "DESCRIPTION" || key === "UID" || key === "STATUS") cur[key] = val;
-    else if (key === "DTSTART") cur.DTSTART = val;
-  }
-  return events;
-}
-
 /* ------------------------------------------------------------------ *
  * 3. State + load
  * ------------------------------------------------------------------ */
@@ -382,31 +348,37 @@ var ALL = [];
 var filter = { timeline: "upcoming", locs: {}, dists: {}, q: "" };
 var today = (function () { var t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); })();
 
-function setSource(kind) {
+function fmtGen(iso) {
+  try { return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(new Date(iso)); }
+  catch (e) { return String(iso || "").slice(0, 10); }
+}
+function setSource(kind, generated) {
   var el = document.getElementById("source");
-  if (kind === "live") { el.textContent = "● Live"; el.className = "badge live"; }
-  else {
+  if (kind === "live") {
+    el.textContent = generated ? "● Live · updated " + fmtGen(generated) : "● Live";
+    el.className = "badge live";
+  } else {
     el.textContent = "● Snapshot " + SNAPSHOT_DATE; el.className = "badge snap";
     var n = document.getElementById("snapNote");
     n.style.display = "block";
-    n.innerHTML = "Showing a saved snapshot (" + SNAPSHOT_DATE + "). The live feed couldn't be reached — this works only if the running calendar is set to <b>public</b>.";
+    n.innerHTML = "Couldn't load the auto-refreshed data file (<code>races.json</code>) — showing the built-in snapshot from " + SNAPSHOT_DATE + ".";
   }
 }
 function fetchWithTimeout(url, ms) {
   var ctrl = new AbortController(), t = setTimeout(function () { ctrl.abort(); }, ms);
-  return fetch(url, { signal: ctrl.signal }).then(function (r) {
-    clearTimeout(t); if (!r.ok) throw new Error("HTTP " + r.status); return r.text();
+  return fetch(url, { signal: ctrl.signal, cache: "no-store" }).then(function (r) {
+    clearTimeout(t); if (!r.ok) throw new Error("HTTP " + r.status); return r.json();
   });
 }
-function tryLive(i) {
-  if (i >= PROXIES.length) return Promise.reject();
-  return fetchWithTimeout(PROXIES[i](ICS_URL), 9000).then(function (txt) {
-    var ev = parseICS(txt); if (!ev.length) throw new Error("empty"); return ev;
-  }).catch(function () { return tryLive(i + 1); });
-}
 function boot() {
-  tryLive(0).then(function (ev) { ALL = ev; setSource("live"); render(); })
-            .catch(function () { ALL = fromSnapshot(); setSource("snapshot"); render(); });
+  fetchWithTimeout(RACES_URL + "?_=" + Date.now(), 9000).then(function (data) {
+    var evs = (data && data.events) || [];
+    if (!evs.length) throw new Error("empty");
+    ALL = evs.map(function (e) { return makeEvent(e.name, dateFromYMD(e.date), e.loc, e.desc, e.status, e.intl); });
+    setSource("live", data.generated); render();
+  }).catch(function () {
+    ALL = fromSnapshot(); setSource("snapshot"); render();
+  });
 }
 
 /* ------------------------------------------------------------------ *
