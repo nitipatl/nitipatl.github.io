@@ -1,18 +1,31 @@
 /*
-  Minimal mono theme — black / white / gray only.
+  Race-day editorial theme — aligned with nitipatl.github.io/running-events/
+  Fonts: Oswald (display) + Source Sans 3 (body)
+  Warm paper bg, ink rules, orange accent.
 */
 
 :root {
-	--bg: #ffffff;
-	--fg: #111111;
-	--muted: #666666;
-	--border: #e5e5e5;
-	--subtle: #f5f5f5;
-	--link: #111111;
-	--link-hover: #000000;
-	--max-width: 40rem;
-	--font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-		"Helvetica Neue", Arial, "Noto Sans Thai", "Noto Sans", sans-serif;
+	--bg: #f2f0e9;
+	--bg-soft: #ebe8df;
+	--ink: #111111;
+	--ink-soft: #3a3a3a;
+	--muted: #6a6a6a;
+	--rule: #1a1a1a;
+	--rule-soft: #c8c4b8;
+	--orange: #e65a28;
+	--orange-dim: rgba(230, 90, 40, 0.12);
+	--stamp: #111;
+	--max: 680px;
+	/* aliases used across components */
+	--fg: var(--ink);
+	--border: var(--rule-soft);
+	--subtle: var(--bg-soft);
+	--link: var(--ink);
+	--link-hover: var(--orange);
+	--max-width: var(--max);
+	--font-display: 'Oswald', sans-serif;
+	--font-sans: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+		'Sarabun', 'Noto Sans Thai', Tahoma, sans-serif;
 }
 
 *,
@@ -21,25 +34,39 @@
 	box-sizing: border-box;
 }
 
+html {
+	-webkit-text-size-adjust: 100%;
+}
+
 body {
-	font-family: var(--font-sans);
 	margin: 0;
 	padding: 0;
+	min-height: 100vh;
 	text-align: left;
-	background: var(--bg);
-	color: var(--fg);
-	font-size: 1.125rem;
-	line-height: 1.7;
+	background:
+		radial-gradient(ellipse at 20% 0%, rgba(0, 0, 0, 0.03), transparent 50%),
+		repeating-linear-gradient(
+			0deg,
+			transparent,
+			transparent 3px,
+			rgba(0, 0, 0, 0.012) 3px,
+			rgba(0, 0, 0, 0.012) 4px
+		),
+		var(--bg);
+	color: var(--ink);
+	font-family: var(--font-sans);
+	font-size: 1.05rem;
+	line-height: 1.55;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
 	-webkit-font-smoothing: antialiased;
 }
 
 main {
-	width: var(--max-width);
-	max-width: calc(100% - 2.5rem);
+	width: var(--max);
+	max-width: calc(100% - 2rem);
 	margin: 0 auto;
-	padding: 3.5rem 0 4rem;
+	padding: 1.5rem 0 4rem;
 }
 
 h1,
@@ -49,36 +76,39 @@ h4,
 h5,
 h6 {
 	margin: 0 0 0.75rem 0;
-	color: var(--fg);
-	line-height: 1.25;
-	font-weight: 600;
-	letter-spacing: -0.02em;
+	color: var(--ink);
+	font-family: var(--font-display);
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	line-height: 1.15;
 }
 
 h1 {
-	font-size: 2rem;
+	font-size: clamp(1.7rem, 6vw, 2.35rem);
+	line-height: 0.95;
 }
 
 h2 {
-	font-size: 1.5rem;
+	font-size: clamp(1.15rem, 3.5vw, 1.45rem);
 }
 
 h3 {
-	font-size: 1.25rem;
+	font-size: 1.15rem;
 }
 
 h4 {
-	font-size: 1.125rem;
+	font-size: 1.05rem;
 }
 
 h5,
 h6 {
-	font-size: 1rem;
+	font-size: 0.95rem;
 }
 
 strong,
 b {
-	font-weight: 600;
+	font-weight: 700;
 }
 
 a {
@@ -86,6 +116,7 @@ a {
 	text-decoration: underline;
 	text-decoration-thickness: 1px;
 	text-underline-offset: 0.15em;
+	transition: color 0.12s, border-color 0.12s;
 }
 
 a:hover {
@@ -93,11 +124,11 @@ a:hover {
 }
 
 p {
-	margin: 0 0 1.25em 0;
+	margin: 0 0 1.15em 0;
 }
 
 .prose p {
-	margin-bottom: 1.5em;
+	margin-bottom: 1.35em;
 }
 
 ul,
@@ -123,7 +154,7 @@ table {
 
 th,
 td {
-	border-bottom: 1px solid var(--border);
+	border-bottom: 1px solid var(--rule-soft);
 	padding: 0.5em 0.75em;
 	text-align: left;
 }
@@ -131,22 +162,22 @@ td {
 img {
 	max-width: 100%;
 	height: auto;
-	border-radius: 2px;
+	border-radius: 0;
 }
 
 code {
 	padding: 0.15em 0.4em;
-	background-color: var(--subtle);
-	border: 1px solid var(--border);
-	border-radius: 2px;
+	background-color: var(--bg-soft);
+	border: 1.5px solid var(--rule-soft);
+	border-radius: 0;
 	font-size: 0.9em;
 }
 
 pre {
 	padding: 1.25em;
-	border-radius: 2px;
-	border: 1px solid var(--border);
-	background: var(--subtle);
+	border-radius: 0;
+	border: 1.5px solid var(--rule);
+	background: var(--bg-soft);
 	overflow-x: auto;
 }
 
@@ -155,25 +186,63 @@ pre > code {
 }
 
 blockquote {
-	border-left: 2px solid var(--fg);
-	padding: 0 0 0 1.25rem;
+	border-left: 2.5px solid var(--orange);
+	padding: 0 0 0 1.15rem;
 	margin: 0 0 1.5em 0;
-	color: var(--muted);
+	color: var(--ink-soft);
 	font-size: 1.05em;
 }
 
 hr {
 	border: none;
-	border-top: 1px solid var(--border);
-	margin: 2.5rem 0;
+	border-top: 2px solid var(--rule);
+	margin: 2.25rem 0;
+}
+
+/* Shared card / panel surface (matches running-events .hero / .card) */
+.panel {
+	border: 2px solid var(--rule);
+	background: var(--bg);
+	box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.08);
+	position: relative;
+	overflow: hidden;
+}
+
+.panel::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: repeating-linear-gradient(
+		0deg,
+		transparent,
+		transparent 3px,
+		rgba(0, 0, 0, 0.015) 3px,
+		rgba(0, 0, 0, 0.015) 4px
+	);
+	pointer-events: none;
+}
+
+.kicker {
+	font-family: var(--font-display);
+	font-size: 0.62rem;
+	font-weight: 700;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: var(--muted);
 }
 
 @media (max-width: 720px) {
 	body {
-		font-size: 1.05rem;
+		font-size: 1rem;
 	}
 	main {
-		padding: 2rem 0 3rem;
+		padding: 1.1rem 0 3rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	a {
+		transition: none;
 	}
 }
 

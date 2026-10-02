@@ -17,9 +17,26 @@ const posts = (await getCollection('blog')).sort(
 	<head>
 		<BaseHead title={`Blog · ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
 		<style>
-			h1 {
-				margin-bottom: 2rem;
-				font-size: 1.75rem;
+			.sec {
+				display: flex;
+				align-items: baseline;
+				gap: 10px;
+				font-family: var(--font-display);
+				font-size: 0.78rem;
+				font-weight: 700;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+				color: var(--ink);
+				margin: 8px 0 0;
+				padding: 0 0 8px;
+				border-bottom: 2px solid var(--rule);
+			}
+			.sec .count {
+				font-size: 0.68rem;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				color: var(--muted);
+				margin-left: auto;
 			}
 			ul {
 				list-style-type: none;
@@ -27,51 +44,72 @@ const posts = (await getCollection('blog')).sort(
 				padding: 0;
 			}
 			ul li {
-				border-top: 1px solid var(--border);
-			}
-			ul li:last-child {
-				border-bottom: 1px solid var(--border);
+				border-bottom: 1px solid var(--rule);
 			}
 			ul li a {
 				display: grid;
-				grid-template-columns: 1fr auto;
-				gap: 1rem;
-				align-items: baseline;
-				padding: 1.25rem 0;
+				grid-template-columns: minmax(0, 1fr) auto;
+				gap: 0 12px;
+				align-items: center;
+				padding: 14px 2px;
 				text-decoration: none;
+				transition: background 0.12s;
 			}
-			ul li a:hover .title {
-				text-decoration: underline;
-				text-underline-offset: 0.15em;
+			ul li a:hover {
+				background: rgba(0, 0, 0, 0.025);
 			}
 			.title {
 				margin: 0;
-				color: var(--fg);
-				font-size: 1.1rem;
-				font-weight: 500;
-				line-height: 1.35;
+				color: var(--ink);
+				font-family: var(--font-display);
+				font-size: 1.02rem;
+				font-weight: 700;
+				letter-spacing: 0.01em;
+				text-transform: uppercase;
+				line-height: 1.2;
 			}
 			.date {
 				margin: 0;
 				color: var(--muted);
-				font-size: 0.9rem;
+				font-family: var(--font-display);
+				font-size: 0.68rem;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
 				white-space: nowrap;
+				text-align: right;
 			}
 			.thumb {
 				display: none;
 			}
+			.empty {
+				text-align: center;
+				color: var(--muted);
+				padding: 36px 16px;
+				margin: 12px 0;
+				border: 1.5px dashed var(--rule);
+			}
+			.empty p {
+				font-family: var(--font-display);
+				font-size: 0.95rem;
+				font-weight: 700;
+				letter-spacing: 0.06em;
+				text-transform: uppercase;
+				color: var(--ink);
+				margin: 0;
+			}
 			@media (min-width: 720px) {
 				ul li a.has-thumb {
-					grid-template-columns: 7rem 1fr auto;
-					align-items: center;
+					grid-template-columns: 7rem minmax(0, 1fr) auto;
+					gap: 0 14px;
 				}
 				.thumb {
 					display: block;
 					width: 7rem;
 					height: 3.5rem;
 					object-fit: cover;
-					border-radius: 2px;
-					border: 1px solid var(--border);
+					border-radius: 0;
+					border: 1.5px solid var(--rule);
 				}
 			}
 		</style>
@@ -80,33 +118,39 @@ const posts = (await getCollection('blog')).sort(
 		<Header />
 		<main>
 			<section>
-				<h1>Blog</h1>
-				<ul>
-					{
-						posts.map((post) => (
-							<li>
-								<a
-									href={`/blog/${post.id}/`}
-									class:list={[{ 'has-thumb': !!post.data.heroImage }]}
-								>
-									{post.data.heroImage && (
-										<Image
-											class="thumb"
-											width={140}
-											height={70}
-											src={post.data.heroImage}
-											alt=""
-										/>
-									)}
-									<h2 class="title">{post.data.title}</h2>
-									<p class="date">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
-								</a>
-							</li>
-						))
-					}
-				</ul>
+				<p class="sec">Blog<span class="count">{posts.length}</span></p>
+				{
+					posts.length === 0 ? (
+						<div class="empty">
+							<p>No posts yet</p>
+						</div>
+					) : (
+						<ul>
+							{posts.map((post) => (
+								<li>
+									<a
+										href={`/blog/${post.id}/`}
+										class:list={[{ 'has-thumb': !!post.data.heroImage }]}
+									>
+										{post.data.heroImage && (
+											<Image
+												class="thumb"
+												width={140}
+												height={70}
+												src={post.data.heroImage}
+												alt=""
+											/>
+										)}
+										<h2 class="title">{post.data.title}</h2>
+										<p class="date">
+											<FormattedDate date={post.data.pubDate} />
+										</p>
+									</a>
+								</li>
+							))}
+						</ul>
+					)
+				}
 			</section>
 		</main>
 		<Footer />
