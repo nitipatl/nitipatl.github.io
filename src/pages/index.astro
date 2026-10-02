@@ -9,18 +9,53 @@ import { SITE_AUTHOR, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 <html lang="th">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<style>
+			.lead {
+				color: var(--muted);
+				font-size: 1.15rem;
+				margin-bottom: 2.5rem;
+			}
+			.links {
+				list-style: none;
+				padding: 0;
+				margin: 0;
+				border-top: 1px solid var(--border);
+			}
+			.links li {
+				border-bottom: 1px solid var(--border);
+				margin: 0;
+			}
+			.links a {
+				display: block;
+				padding: 1rem 0;
+				text-decoration: none;
+				color: var(--fg);
+			}
+			.links a:hover {
+				text-decoration: underline;
+				text-underline-offset: 0.15em;
+			}
+			.links span {
+				color: var(--muted);
+				font-size: 0.95rem;
+			}
+		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
 			<h1>สวัสดี, I'm Nitipat</h1>
-			<p>
+			<p class="lead">
 				{SITE_AUTHOR} — personal notes and a small blog.
 				เว็บส่วนตัวสำหรับบันทึกสั้น ๆ เป็นภาษาไทยและอังกฤษ
 			</p>
-			<ul>
-				<li><a href="/blog/">Blog</a> — posts</li>
-				<li><a href="/about/">About</a></li>
+			<ul class="links">
+				<li>
+					<a href="/blog/">Blog <span>— posts</span></a>
+				</li>
+				<li>
+					<a href="/about/">About</a>
+				</li>
 			</ul>
 		</main>
 		<Footer />
