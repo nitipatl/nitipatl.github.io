@@ -9,6 +9,8 @@ npm install
 npm run dev
 ```
 
+Requires Node.js 22+.
+
 ## Build
 
 ```bash
@@ -22,4 +24,15 @@ Blog posts live in `src/content/blog/*.md` (and `.mdx`).
 
 ## Deploy
 
-Push to `master` triggers `.github/workflows/deploy.yml` (Astro build + GitHub Pages).
+- **Source:** `master` (Astro project)
+- **Published site:** `gh-pages` branch (contents of `dist/`)
+- Pages source: branch `gh-pages` / path `/`
+
+To republish after changes:
+
+```bash
+npm run build
+# copy dist/ to gh-pages branch and push
+```
+
+Optional later: add `.github/workflows/deploy.yml` (needs a token with `workflow` scope) and switch Pages to “GitHub Actions”.
